@@ -18,12 +18,10 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class Rests {
     private Retrofit retrofit;
     private final RestsRepo repose;
-    private final String API_KEY;
+    private final String API_KEY = "1234";
 
-    public Rests(Context context) {
-        String BASE_URL_API = "https://api-receiver.jasvicall.my.id/";
-        API_KEY = "1234";
-        Retrofit client = getClient(BASE_URL_API);
+    public Rests() {
+        Retrofit client = getClient("https://api-receiver.jasvicall.my.id/");
         repose = client.create(RestsRepo.class);
     }
 
