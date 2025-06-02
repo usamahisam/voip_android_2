@@ -28,7 +28,7 @@ class Voip(
         voipCallbacks.forEach { it.onAccountStatus(status) }
     }
 
-    fun notifyStatus(status: String) {
+    fun notifyCallStatus(status: String) {
         voipCallbacks.forEach { it.onCallStatus(status) }
     }
 
