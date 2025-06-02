@@ -1,0 +1,43 @@
+plugins {
+    id 'com.android.library'
+    alias(libs.plugins.kotlin.android)
+}
+
+android {
+    namespace 'com.breakreasi.voip_android_2'
+    compileSdk 35
+
+    defaultConfig {
+        minSdk 23
+
+        ndk {
+            moduleName "libpjsua2"
+        }
+
+        externalNativeBuild {
+            cmake {
+                arguments "-DANDROID_STL=c++_shared"
+            }
+        }
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation(libs.material)
+    implementation(libs.full.rtc.basic)
+}

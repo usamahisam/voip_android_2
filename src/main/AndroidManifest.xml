@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <service
+            android:name="com.breakreasi.voip_android_2.sip.SipService"
+            android:enabled="true"
+            android:exported="false" />
+    </application>
+</manifest>
