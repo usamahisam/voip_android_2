@@ -14,10 +14,12 @@ import org.pjsip.pjsua2.pjsip_status_code
 class SipAccount(
     private var sipService: SipService
 ): Account() {
-    private var accCfg: AccountConfig ?= null
+    var accCfg: AccountConfig ?= null
     var host: String ?= null
     var port: Int ?= null
     var call: SipCall ?= null
+    var destination: String = ""
+    var withVideo: Boolean = false
 
     override fun onRegStarted(prm: OnRegStartedParam?) {
     }
@@ -39,7 +41,18 @@ class SipAccount(
     }
 
     fun auth(host: String?, port: Int?, displayName: String, username: String, password: String) {
-        if (checkIsCreated()) return
+        auth(host, port, displayName, username, password, "", false)
+    }
+
+    fun auth(host: String?, port: Int?, displayName: String, username: String, password: String, destination: String, withVideo: Boolean) {
+        this.destination = destination
+        this.withVideo = withVideo
+        if (checkIsCreated()) {
+            if (this.destination.isNotEmpty()) {
+                newCall().makeCall(this.destination, withVideo)
+            }
+            return
+        }
         val credArray = AuthCredInfoVector()
         val cred = AuthCredInfo("digest", "*", username, 0, password)
         credArray.add(cred)
@@ -84,11 +97,18 @@ class SipAccount(
     }
 
     private fun checkAccountStatus(): String {
-        return try {
+        try {
             val info = this.info
-            "Account ID: ${info.id}, Reg Status: ${info.regStatusText}"
+            handleAccountSuccess()
+            return "Account ID: ${info.id}, Reg Status: ${info.regStatusText}"
         } catch (e: Exception) {
-            "Account not created or failed: ${e.message}"
+            return "Account not created or failed: ${e.message}"
+        }
+    }
+
+    private fun handleAccountSuccess() {
+        if (this.destination.isNotEmpty()) {
+            newCall().makeCall(destination, withVideo)
         }
     }
 

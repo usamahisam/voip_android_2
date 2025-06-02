@@ -44,6 +44,7 @@ class SipCall(
                 }
                 pjsip_inv_state.PJSIP_INV_STATE_DISCONNECTED -> {
                     sipService.notifyStatus("Disconnected")
+                    sipService.sipAudio.stop()
                     sipService.sipVideo.stop()
                     delete()
                 }
@@ -63,7 +64,7 @@ class SipCall(
                 if (mediaInfo.type == pjmedia_type.PJMEDIA_TYPE_AUDIO &&
                     media != null &&
                     mediaInfo.status == pjsua_call_media_status.PJSUA_CALL_MEDIA_ACTIVE) {
-                    mediaAudio(media)
+                    sipService.sipAudio.start(media)
                 } else if (mediaInfo.type == pjmedia_type.PJMEDIA_TYPE_VIDEO &&
                     mediaInfo.status == pjsua_call_media_status.PJSUA_CALL_MEDIA_ACTIVE &&
                     mediaInfo.videoIncomingWindowId != pjsua2.INVALID_ID) {
@@ -86,6 +87,7 @@ class SipCall(
                         val fmtEvent = prm.ev.data.fmtChanged
                         val w = fmtEvent.newWidth.toInt()
                         val h = fmtEvent.newHeight.toInt()
+                        sipService.sipVideo.changeFmt(w, h)
                     }
                 } catch (_: Exception) {
                 }
@@ -145,13 +147,6 @@ class SipCall(
                 statusCode = pjsip_status_code.PJSIP_SC_DECLINE
             }
             hangup(callOpParam)
-        } catch (_: Exception) {
-        }
-    }
-
-    private fun mediaAudio(media: Media) {
-        try {
-            val audioMedia = AudioMedia.typecastFromMedia(media)
         } catch (_: Exception) {
         }
     }

@@ -35,9 +35,15 @@ android {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
+    kotlinOptions {
+        jvmTarget = '17'
+    }
 }
 
 dependencies {
     implementation(libs.material)
     implementation(libs.full.rtc.basic)
+    implementation libs.core.ktx
+    implementation(libs.retrofit)
+    implementation(libs.retrofit2.converter.gson)
 }

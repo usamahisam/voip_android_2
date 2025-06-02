@@ -5,5 +5,9 @@
             android:name="com.breakreasi.voip_android_2.sip.SipService"
             android:enabled="true"
             android:exported="false" />
+        <service
+            android:name="com.breakreasi.voip_android_2.agora.AgoraService"
+            android:enabled="true"
+            android:exported="false" />
     </application>
 </manifest>

@@ -8,15 +8,16 @@ import org.pjsip.pjsua2.EpConfig
 import org.pjsip.pjsua2.TransportConfig
 import org.pjsip.pjsua2.pj_qos_type
 import org.pjsip.pjsua2.pjsip_transport_type_e
+import java.util.Locale
 
 class SipEngine(
-    private val context: Context
+    private val sipService: SipService
 ) {
-    private var endpoint: SipEndpoint? = null
+    var endpoint: SipEndpoint? = null
     private var epConfig: EpConfig? = null
 
     fun init(udpPort: Int? = null) {
-        val cm = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+        val cm = sipService.getSystemService(Context.CAMERA_SERVICE) as CameraManager
         try {
             PjCameraInfo2.SetCameraManager(cm)
             endpoint = SipEndpoint().apply {
@@ -48,6 +49,12 @@ class SipEngine(
             endpoint?.libStart()
         } catch (_: Exception) {
         }
+    }
+
+    fun configures() {
+        sipService.sipAudio.configure()
+        sipService.sipCamera.configure()
+        sipService.sipVideo.configure()
     }
 
     fun destroy() {
