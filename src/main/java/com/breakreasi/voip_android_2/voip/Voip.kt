@@ -3,9 +3,9 @@ package com.breakreasi.voip_android_2.voip
 import android.content.Context
 
 class Voip(
-    private val context: Context,
+    val context: Context,
 ) {
-    private val voipServiceConnection = VoipServiceConnection(context)
+    private val voipServiceConnection = VoipServiceConnection(this)
     private val voipCallbacks = mutableListOf<VoipCallback>()
 
     fun engine(): VoipServiceConnection {

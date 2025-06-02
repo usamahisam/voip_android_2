@@ -10,7 +10,7 @@ import com.breakreasi.voip_android_2.agora.AgoraService
 import com.breakreasi.voip_android_2.sip.SipService
 
 class VoipServiceConnection(
-    private val context: Context
+    private val voip: Voip
 ) : ServiceConnection {
     var sipService: SipService? = null
     var agoraService: AgoraService? = null
@@ -48,12 +48,12 @@ class VoipServiceConnection(
     }
 
     private fun startService(cls: Class<*>) {
-        val i = Intent(context, cls)
-        context.bindService(i, this, Context.BIND_ABOVE_CLIENT)
+        val i = Intent(voip.context, cls)
+        voip.context.bindService(i, this, Context.BIND_ABOVE_CLIENT)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            context.startForegroundService(i)
+            voip.context.startForegroundService(i)
         } else {
-            context.startService(i)
+            voip.context.startService(i)
         }
     }
 
@@ -63,9 +63,9 @@ class VoipServiceConnection(
     }
 
     private fun stopService(cls: Class<*>) {
-        val i = Intent(context, cls)
-        context.unbindService(this)
-        context.stopService(i)
+        val i = Intent(voip.context, cls)
+        voip.context.unbindService(this)
+        voip.context.stopService(i)
     }
 
     fun sipAuth(displayName: String, username: String, password: String, destination: String, withVideo: Boolean) {
