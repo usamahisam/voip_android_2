@@ -2,7 +2,9 @@ package com.breakreasi.voip_android_2.voip
 
 import android.app.Service
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.os.Binder
+import android.os.Build
 import android.os.IBinder
 import android.widget.Toast
 
@@ -50,6 +52,10 @@ class VoipNotificationService: Service() {
     fun calling(type: String, displayName: String, withVideo: Boolean, token: String) {
         val notificationCall = VoipNotificationCall(this)
         val notification = notificationCall.buildNotifyCall(type, displayName, withVideo, token)
-        startForeground(1, notification)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(1092, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL)
+        } else {
+            startForeground(1092, notification)
+        }
     }
 }

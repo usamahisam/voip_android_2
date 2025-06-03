@@ -27,6 +27,8 @@ class VoipNotificationCall(
             )
             channel.description = "Channel for incoming VOIP calls"
             channel.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+            val notificationManager = context.getSystemService(NotificationManager::class.java)
+            notificationManager.createNotificationChannel(channel)
         }
     }
 
@@ -106,8 +108,8 @@ class VoipNotificationCall(
 //            playRingtone()
         }
         val notification = builder.build()
-        notification.flags =
-            notification.flags or (Notification.FLAG_INSISTENT or Notification.FLAG_NO_CLEAR or Notification.FLAG_ONGOING_EVENT)
+//        notification.flags =
+//            notification.flags or (Notification.FLAG_INSISTENT or Notification.FLAG_NO_CLEAR or Notification.FLAG_ONGOING_EVENT)
         return notification
     }
 }

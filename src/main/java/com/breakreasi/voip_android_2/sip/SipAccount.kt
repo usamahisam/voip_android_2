@@ -136,6 +136,6 @@ class SipAccount(
 
     fun checkIsCall(): Boolean {
         if (call == null) return false
-        return call?.isCall == true
+        return call!!.isCall
     }
 }

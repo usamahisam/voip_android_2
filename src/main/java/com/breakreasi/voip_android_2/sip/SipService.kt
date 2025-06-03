@@ -57,7 +57,7 @@ class SipService : Service() {
 
     fun callIsOn(): Boolean {
         if (sipAccount == null) return false
-        if (sipAccount?.call == null) return false
+        if (sipAccount!!.call == null) return false
         return sipAccount!!.checkIsCall()
     }
 

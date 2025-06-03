@@ -92,10 +92,14 @@ class Voip(
     }
 
     fun callIsOn(): Boolean {
-        if (voipServiceConnection.sipService != null) {
-            return voipServiceConnection.sipService?.callIsOn() == true
+        try {
+            if (voipServiceConnection.sipService != null) {
+                return voipServiceConnection.sipService!!.callIsOn()
+            }
+            return false
+        } catch (_: Exception) {
+            return false
         }
-        return false
     }
 
     fun makeCall(destination: String, withVideo: Boolean) {
