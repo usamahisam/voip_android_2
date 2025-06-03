@@ -33,7 +33,11 @@ class SipAccount(
     }
 
     override fun onRegState(prm: OnRegStateParam?) {
-        checkAccountStatus()
+        if (prm?.code == pjsip_status_code.PJSIP_SC_OK) {
+            handleAccountSuccess()
+        } else {
+            sipService.deleteAccount()
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
@@ -110,19 +114,14 @@ class SipAccount(
         return id != -1
     }
 
-    private fun checkAccountStatus() {
+    private fun handleAccountSuccess() {
         try {
-            val info = this.info
-            handleAccountSuccess(info.id)
+            sipService.voip.notifyAccountStatus("success")
+            if (this.destination.isNotEmpty()) {
+                newCall().makeCall(destination, withVideo)
+            }
         } catch (e: Exception) {
             sipService.voip.notifyAccountStatus("blocked")
-        }
-    }
-
-    private fun handleAccountSuccess(id: Int) {
-        sipService.voip.notifyAccountStatus("success")
-        if (this.destination.isNotEmpty()) {
-            newCall().makeCall(destination, withVideo)
         }
     }
 
