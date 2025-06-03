@@ -51,8 +51,8 @@ class SipCamera(
             param.capDev = backCamera
         }
         try {
-            sipService.sipAccount.call!!.vidSetStream(pjsua_call_vid_strm_op.PJSUA_CALL_VID_STRM_CHANGE_CAP_DEV, param)
-        } catch (ignored: java.lang.Exception) {
+            sipService.sipAccount!!.call!!.vidSetStream(pjsua_call_vid_strm_op.PJSUA_CALL_VID_STRM_CHANGE_CAP_DEV, param)
+        } catch (_: Exception) {
         }
     }
 

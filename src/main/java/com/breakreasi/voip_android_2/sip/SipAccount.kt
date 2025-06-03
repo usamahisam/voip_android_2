@@ -34,7 +34,6 @@ class SipAccount(
 
     override fun onRegState(prm: OnRegStateParam?) {
         val status = checkAccountStatus()
-        sipService.voip.notifyAccountStatus(status)
         if (prm?.code == pjsip_status_code.PJSIP_SC_OK) {
             println("Registration successful: $status")
         } else {
