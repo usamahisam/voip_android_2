@@ -33,12 +33,7 @@ class SipAccount(
     }
 
     override fun onRegState(prm: OnRegStateParam?) {
-        val status = checkAccountStatus()
-        if (prm?.code == pjsip_status_code.PJSIP_SC_OK) {
-            println("Registration successful: $status")
-        } else {
-            println("Registration failed: $status")
-        }
+        checkAccountStatus()
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
@@ -115,18 +110,16 @@ class SipAccount(
         return id != -1
     }
 
-    private fun checkAccountStatus(): String {
+    private fun checkAccountStatus() {
         try {
             val info = this.info
-            handleAccountSuccess()
-            return "Account ID: ${info.id}, Reg Status: ${info.regStatusText}"
+            handleAccountSuccess(info.id)
         } catch (e: Exception) {
             sipService.voip.notifyAccountStatus("blocked")
-            return "Account not created or failed: ${e.message}"
         }
     }
 
-    private fun handleAccountSuccess() {
+    private fun handleAccountSuccess(id: Int) {
         sipService.voip.notifyAccountStatus("success")
         if (this.destination.isNotEmpty()) {
             newCall().makeCall(destination, withVideo)

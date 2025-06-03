@@ -43,6 +43,7 @@ class SipCall(
             }
             if (currentState == pjsip_inv_state.PJSIP_INV_STATE_CALLING
                 && info.lastStatusCode == 404) {
+                isCall = false
                 disconnected()
                 return
             }

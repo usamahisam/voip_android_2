@@ -45,7 +45,9 @@ class SipService : Service() {
 
     fun auth(voip: Voip, displayName: String, username: String, password: String, destination: String, withVideo: Boolean) {
         this.voip = voip
-        sipAccount = SipAccount(this)
+        if (sipAccount == null) {
+            sipAccount = SipAccount(this)
+        }
         sipAccount?.auth(host, port, displayName, username, password, destination, withVideo)
     }
 
