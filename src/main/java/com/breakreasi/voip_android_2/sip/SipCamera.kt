@@ -55,4 +55,9 @@ class SipCamera(
         } catch (ignored: java.lang.Exception) {
         }
     }
+
+    fun switchCamera() {
+        isFrontCamera = !isFrontCamera
+        switchCamera(isFrontCamera)
+    }
 }

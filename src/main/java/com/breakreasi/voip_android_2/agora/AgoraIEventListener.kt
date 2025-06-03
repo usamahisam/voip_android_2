@@ -1,19 +1,19 @@
 package com.breakreasi.voip_android_2.agora
 
 interface AgoraIEventListener {
-    open fun onAgoraStatus(status: String?)
+    fun onAgoraStatus(status: String?)
 
-    open fun onJoinChannelSuccess(channel: String?, uid: Int, elapsed: Int)
+    fun onJoinChannelSuccess(channel: String?, uid: Int, elapsed: Int)
 
-    open fun onRejoinChannelSuccess(channel: String?, uid: Int, elapsed: Int)
+    fun onRejoinChannelSuccess(channel: String?, uid: Int, elapsed: Int)
 
-    open fun onUserJoined(uid: Int, elapsed: Int)
+    fun onUserJoined(uid: Int, elapsed: Int)
 
-    open fun onUserOffline(uid: Int, reason: Int)
+    fun onUserOffline(uid: Int, reason: Int)
 
-    open fun onConnectionStateChanged(status: Int, reason: Int)
+    fun onConnectionStateChanged(status: Int, reason: Int)
 
-    open fun onPeersOnlineStatusChanged(map: Map<String?, Int?>?)
+    fun onPeersOnlineStatusChanged(map: Map<String?, Int?>?)
 
-    open fun onError(err: Int)
+    fun onError(err: Int)
 }

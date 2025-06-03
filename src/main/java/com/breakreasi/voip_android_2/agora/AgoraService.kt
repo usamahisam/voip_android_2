@@ -4,6 +4,7 @@ import android.app.Service
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
+import com.breakreasi.voip_android_2.voip.Voip
 
 class AgoraService: Service() {
     private var agoraEngine: AgoraEngine? = null
@@ -30,7 +31,11 @@ class AgoraService: Service() {
         super.onDestroy()
     }
 
-    fun configure(displayName: String, channel: String, userToken: String, withVideo: Boolean) {
-        agoraEngine?.configure(displayName, channel, userToken, withVideo)
+    fun configure(voip: Voip, displayName: String, channel: String, userToken: String, withVideo: Boolean) {
+        agoraEngine?.configure(voip, displayName, channel, userToken, withVideo)
+    }
+
+    fun call() {
+//        agoraEngine?
     }
 }

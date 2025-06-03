@@ -1,5 +1,6 @@
 package com.breakreasi.voip_android_2.sip
 
+import android.util.Log
 import android.view.SurfaceView
 import org.pjsip.pjsua2.CallMediaInfo
 import org.pjsip.pjsua2.CodecInfoVector2
@@ -16,41 +17,38 @@ class SipVideo(
     var remoteVideoHandler: SipSurfaceHandler = SipSurfaceHandler()
     val localVideoSurfaces = mutableListOf<SurfaceView>()
     val remoteVideoSurfaces = mutableListOf<SurfaceView>()
+    private var w: Int = 480
+    private var h: Int = 640
+    private var toggleRemoteSurfaceFix = false
 
     fun configure() {
         try {
             val codecs: CodecInfoVector2 = sipService.sipEngine.endpoint!!.videoCodecEnum2()
             for (codec in codecs) {
                 val codecId = codec.codecId
-                if (codecId.contains("H264/97")) {
-                    sipService.sipEngine.endpoint!!.videoCodecSetPriority(codecId, 128.toShort())
-                    setCodecParam(codecId, sipService.sipEngine.endpoint!!.getVideoCodecParam(codecId))
-                } else if (codecId.contains("H264/99")) {
-                    sipService.sipEngine.endpoint!!.videoCodecSetPriority(codecId, 127.toShort())
-                    setCodecParam(codecId, sipService.sipEngine.endpoint!!.getVideoCodecParam(codecId))
-                } else if (codecId.contains("VP8")) {
-                    sipService.sipEngine.endpoint!!.videoCodecSetPriority(codecId, 93.toShort())
-                    setCodecParam(codecId, sipService.sipEngine.endpoint!!.getVideoCodecParam(codecId))
-                } else if (codecId.contains("VP9")) {
-                    sipService.sipEngine.endpoint!!.videoCodecSetPriority(codecId, 80.toShort())
-                    setCodecParam(codecId, sipService.sipEngine.endpoint!!.getVideoCodecParam(codecId))
-                } else {
-                    sipService.sipEngine.endpoint!!.videoCodecSetPriority(codecId, 0.toShort())
-                    setCodecParam(codecId, sipService.sipEngine.endpoint!!.getVideoCodecParam(codecId))
+                val priority = when {
+                    codecId.contains("H264/97") -> 128.toShort()
+                    codecId.contains("H264/99") -> 127.toShort()
+                    codecId.contains("VP8")     -> 93.toShort()
+                    codecId.contains("VP9")     -> 80.toShort()
+                    else -> 0.toShort()
                 }
+                sipService.sipEngine.endpoint!!.videoCodecSetPriority(codecId, priority)
+                setCodecParam(codecId, sipService.sipEngine.endpoint!!.getVideoCodecParam(codecId))
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.e("SipVideo", "Failed to configure codecs: ${e.message}")
         }
     }
 
     private fun setCodecParam(codecId: String, param: VidCodecParam) {
         val mediaFormatVideo = param.encFmt
-        mediaFormatVideo.width = 480
-        mediaFormatVideo.height = 640
+        mediaFormatVideo.width = w.toLong()
+        mediaFormatVideo.height = h.toLong()
         param.encFmt = mediaFormatVideo
         val codecFmtpVector = param.decFmtp
         for (i in codecFmtpVector.indices) {
-            if ("profile-level-id" == codecFmtpVector[i].name) {
+            if (codecFmtpVector[i].name == "profile-level-id") {
                 codecFmtpVector[i].setVal("42e01f")
                 break
             }
@@ -58,57 +56,50 @@ class SipVideo(
         param.decFmtp = codecFmtpVector
         try {
             sipService.sipEngine.endpoint!!.setVideoCodecParam(codecId, param)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.e("SipVideo", "Failed to set codec param: ${e.message}")
         }
     }
 
     fun start(mediaInfo: CallMediaInfo) {
         remoteVideo?.delete()
         localVideo?.delete()
-        localVideo = VideoPreview(sipService.sipCamera.frontCamera)
-        remoteVideo = VideoWindow(mediaInfo.videoIncomingWindowId)
-        startLocal()
-        startRemote()
+        try {
+            localVideo = VideoPreview(sipService.sipCamera.frontCamera)
+            remoteVideo = VideoWindow(mediaInfo.videoIncomingWindowId)
+            localVideoHandler.setPreview(localVideo!!)
+            remoteVideoHandler.setVideo(remoteVideo!!)
+            localVideoSurfaces.forEach {
+                it.holder.addCallback(localVideoHandler)
+                SipSurfaceUtil.surfaceToTop(it)
+            }
+            remoteVideoSurfaces.forEach {
+                it.holder.addCallback(remoteVideoHandler)
+                SipSurfaceUtil.surfaceToBottom(it)
+            }
+            toggleRemoteSurfaceFix = false
+            toggleSurfaceRemoteFit()
+        } catch (_: Exception) {
+        }
     }
 
     fun changeFmt(w: Int, h: Int) {
+//        this.w = w
+//        this.h = h
+//        toggleSurfaceRemoteFit()
     }
 
     fun stop() {
         clearLocalVideo()
         clearRemoteVideo()
-        try {
-            remoteVideo?.delete()
-            remoteVideo = null
-        } catch (_: Exception) {
-        }
-        try {
-            localVideo?.delete()
-            localVideo = null
-        } catch (_: Exception) {
-        }
     }
 
     fun addLocalVideoSurface(surfaceView: SurfaceView) {
-        surfaceView.holder.addCallback(localVideoHandler)
         localVideoSurfaces.add(surfaceView)
-        startLocal()
     }
 
     fun addRemoteVideoSurface(surfaceView: SurfaceView) {
-        surfaceView.holder.addCallback(remoteVideoHandler)
         remoteVideoSurfaces.add(surfaceView)
-        startRemote()
-    }
-
-    private fun startLocal() {
-        if (localVideo == null) return
-        localVideoHandler.start(localVideo!!)
-    }
-
-    private fun startRemote() {
-        if (remoteVideo == null) return
-        remoteVideoHandler.start(remoteVideo!!)
     }
 
     private fun clearLocalVideo() {
@@ -117,5 +108,18 @@ class SipVideo(
 
     private fun clearRemoteVideo() {
         remoteVideoSurfaces.clear()
+    }
+
+    fun toggleSurfaceRemoteFit() {
+        if (toggleRemoteSurfaceFix) {
+            remoteVideoSurfaces.forEach {
+                SipSurfaceUtil.resizeFixWidth(it, w, h)
+            }
+        } else {
+            remoteVideoSurfaces.forEach {
+                SipSurfaceUtil.resizeFixHeight(it, w, h)
+            }
+        }
+        toggleRemoteSurfaceFix = !toggleRemoteSurfaceFix
     }
 }

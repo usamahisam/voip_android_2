@@ -6,31 +6,29 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Build
 import android.os.IBinder
+import android.util.Log
 import com.breakreasi.voip_android_2.agora.AgoraService
 import com.breakreasi.voip_android_2.sip.SipService
 
 class VoipServiceConnection(
     private val voip: Voip
 ) : ServiceConnection {
+    var voipNotificationService: VoipNotificationService? = null
     var sipService: SipService? = null
     var agoraService: AgoraService? = null
-    private var displayName: String = ""
-    private var username: String = ""
-    private var password: String = ""
-    private var destination: String = ""
-    private var channel: String = ""
-    private var userToken: String = ""
-    private var withVideo: Boolean = false
 
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-        if (name?.shortClassName == SipService::class.java.simpleName) {
+        if (name?.shortClassName == SipService::class.java.name) {
             val binder: SipService.LocalBinder = service as SipService.LocalBinder
             sipService = binder.getService()
-            sipService?.auth(displayName, username, password, "", withVideo)
+            sipService?.auth(voip, voip.displayName, voip.username, voip.password, voip.destination, voip.withVideo)
         } else if (name?.shortClassName == AgoraService::class.java.simpleName) {
             val binder: AgoraService.LocalBinder = service as AgoraService.LocalBinder
             agoraService = binder.getService()
-            agoraService?.configure(displayName, channel, userToken, withVideo)
+            agoraService?.configure(voip, voip.displayName, voip.channel, voip.userToken, voip.withVideo)
+        } else if (name?.shortClassName == VoipNotificationService::class.java.simpleName) {
+            val binder: VoipNotificationService.LocalBinder = service as VoipNotificationService.LocalBinder
+            voipNotificationService = binder.getService()
         }
     }
 
@@ -43,18 +41,22 @@ class VoipServiceConnection(
     }
 
     fun start() {
-        startService(SipService::class.java)
-        startService(AgoraService::class.java)
+        if (sipService != null) {
+            sipService?.auth(voip, voip.displayName, voip.username, voip.password, voip.destination, voip.withVideo)
+        } else {
+            startService(SipService::class.java)
+        }
+        if (agoraService != null) {
+            agoraService?.configure(voip, voip.displayName, voip.channel, voip.userToken, voip.withVideo)
+        } else {
+            startService(AgoraService::class.java)
+        }
     }
 
     private fun startService(cls: Class<*>) {
         val i = Intent(voip.context, cls)
         voip.context.bindService(i, this, Context.BIND_ABOVE_CLIENT)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            voip.context.startForegroundService(i)
-        } else {
-            voip.context.startService(i)
-        }
+        voip.context.startService(i)
     }
 
     fun stop() {
@@ -68,18 +70,25 @@ class VoipServiceConnection(
         voip.context.stopService(i)
     }
 
-    fun sipAuth(displayName: String, username: String, password: String, destination: String, withVideo: Boolean) {
-        this.displayName = displayName
-        this.username = username
-        this.password = password
-        this.destination = destination
-        this.withVideo = withVideo
+    fun startServiceNotification(type: VoipType, displayName: String, withVideo: Boolean, token: String) {
+        val i = Intent(voip.context, VoipNotificationService::class.java)
+        i.setAction("notificationCallService")
+        i.putExtra("type", type.name)
+        i.putExtra("displayName", displayName)
+        i.putExtra("withVideo", withVideo)
+        i.putExtra("token", token)
+        voip.context.bindService(i, this, Context.BIND_ABOVE_CLIENT)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            voip.context.startForegroundService(i)
+        } else {
+            voip.context.startService(i)
+        }
     }
 
-    fun agoraConfigure(displayName: String, channel: String, userToken: String, withVideo: Boolean) {
-        this.displayName = displayName
-        this.channel = channel
-        this.userToken = userToken
-        this.withVideo = withVideo
+    fun stopServiceNotification() {
+        try {
+            stopService(VoipNotificationService::class.java)
+        } catch (_: Exception) {
+        }
     }
 }

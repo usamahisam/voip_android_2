@@ -1,0 +1,44 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.breakreasi.voip_android_2" >
+4
+5    <uses-sdk android:minSdkVersion="23" />
+6
+7    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+7-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:3:5-77
+7-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:3:22-74
+8    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_PHONE_CALL" />
+8-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:4:5-88
+8-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:4:22-85
+9
+10    <application>
+10-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:5:5-19:19
+11        <service
+11-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:6:9-10:56
+12            android:name="com.breakreasi.voip_android_2.voip.VoipNotificationService"
+12-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:7:13-86
+13            android:enabled="true"
+13-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:8:13-35
+14            android:exported="false"
+14-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:9:13-37
+15            android:foregroundServiceType="phoneCall" />
+15-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:10:13-54
+16        <service
+16-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:11:9-14:40
+17            android:name="com.breakreasi.voip_android_2.sip.SipService"
+17-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:12:13-72
+18            android:enabled="true"
+18-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:13:13-35
+19            android:exported="false" />
+19-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:14:13-37
+20        <service
+20-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:15:9-18:40
+21            android:name="com.breakreasi.voip_android_2.agora.AgoraService"
+21-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:16:13-76
+22            android:enabled="true"
+22-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:17:13-35
+23            android:exported="false" />
+23-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:18:13-37
+24    </application>
+25
+26</manifest>

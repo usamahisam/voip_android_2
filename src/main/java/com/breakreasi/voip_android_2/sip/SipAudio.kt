@@ -1,10 +1,14 @@
 package com.breakreasi.voip_android_2.sip
 
+import android.util.Log
 import org.pjsip.pjsua2.AudDevManager
 import org.pjsip.pjsua2.AudioMedia
 import org.pjsip.pjsua2.CodecInfoVector2
 import org.pjsip.pjsua2.Media
 import org.pjsip.pjsua2.pjmedia_aud_dev_route
+import java.util.logging.Logger
+
+
 
 class SipAudio(
     private val sipService: SipService
@@ -17,45 +21,59 @@ class SipAudio(
             val codecs: CodecInfoVector2 = sipService.sipEngine.endpoint!!.codecEnum2()
             for (codec in codecs) {
                 val codecId = codec.codecId
-                if (codecId.startsWith("G729")) {
-                    sipService.sipEngine.endpoint!!.codecSetPriority(codecId, 254.toShort())
-                } else if (codecId.startsWith("opus")) {
-                    sipService.sipEngine.endpoint!!.codecSetPriority(codecId, 240.toShort())
-                } else if (codecId.startsWith("PCMA")) {
-                    sipService.sipEngine.endpoint!!.codecSetPriority(codecId, 235.toShort())
-                } else if (codecId.startsWith("PCMU")) {
-                    sipService.sipEngine.endpoint!!.codecSetPriority(codecId, 230.toShort())
-                } else {
-                    sipService.sipEngine.endpoint!!.codecSetPriority(codecId, 0.toShort())
+                val priority = when {
+                    codecId.startsWith("G729") -> 254.toShort()
+                    codecId.startsWith("opus") -> 240.toShort()
+                    codecId.startsWith("PCMA") -> 235.toShort()
+                    codecId.startsWith("PCMU") -> 230.toShort()
+                    else -> 0.toShort()
                 }
+                sipService.sipEngine.endpoint!!.codecSetPriority(codecId, priority)
             }
-        } catch (ignored: java.lang.Exception) {
+        } catch (e: Exception) {
+            Log.e("SipAudio", "Failed to configure codecs", e)
         }
     }
 
     fun start(media: Media) {
+        val audioMedia = AudioMedia.typecastFromMedia(media)
         try {
-            audioMedia = AudioMedia.typecastFromMedia(media)
+            val audDevManager: AudDevManager = sipService.sipEngine.endpoint!!.audDevManager()
+            if (audioMedia != null) {
+                try {
+                    audioMedia.adjustRxLevel(1.5.toFloat())
+                    audioMedia.adjustTxLevel(1.5.toFloat())
+                } catch (_: Exception) {
+                }
+                audioMedia.startTransmit(audDevManager.playbackDevMedia)
+                audDevManager.captureDevMedia.startTransmit(audioMedia)
+            }
         } catch (_: Exception) {
-            return
         }
-        try {
-            sipService.sipEngine.endpoint?.audDevManager()?.captureDevMedia?.startTransmit(audioMedia)
-            sipService.sipEngine.endpoint?.audDevManager()?.captureDevMedia?.adjustTxLevel(2.0f)
-            sipService.sipEngine.endpoint?.audDevManager()?.captureDevMedia?.adjustRxLevel(2.0f)
-            audioMedia?.startTransmit(sipService.sipEngine.endpoint?.audDevManager()?.playbackDevMedia)
-            audioMedia?.adjustRxLevel(2.0f)
-            audioMedia?.adjustTxLevel(2.0f)
-        } catch (_: Exception) {
-        }
+        mic()
     }
 
     fun stop() {
         try {
-            sipService.sipEngine.endpoint?.audDevManager()?.captureDevMedia?.stopTransmit(audioMedia)
-            audioMedia?.stopTransmit(sipService.sipEngine.endpoint?.audDevManager()?.playbackDevMedia)
+            val adm = sipService.sipEngine.endpoint?.audDevManager()
+            val captureMedia = adm?.captureDevMedia
+            val playbackMedia = adm?.playbackDevMedia
+            val portId = audioMedia?.portId ?: -1
+            if (audioMedia != null && portId >= 0) {
+                try {
+                    if (adm != null) {
+                        captureMedia?.stopTransmit(audioMedia)
+                    }
+                    audioMedia?.stopTransmit(playbackMedia)
+                } catch (e: Exception) {
+                    Log.e("SipAudio", "Error while stopping transmit", e)
+                }
+            } else {
+                Log.w("SipAudio", "audioMedia is null or has invalid portId ($portId)")
+            }
             audioMedia = null
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.e("SipAudio", "Failed to stop audio", e)
         }
     }
 
@@ -64,9 +82,11 @@ class SipAudio(
         try {
             isMute = true
             audioMedia!!.adjustTxLevel(0.0f)
-            sipService.sipEngine.endpoint?.audDevManager()?.captureDevMedia?.adjustTxLevel(0.0f)
-            sipService.sipEngine.endpoint?.audDevManager()?.captureDevMedia?.stopTransmit(audioMedia)
-        } catch (_: Exception) {
+            val capture = sipService.sipEngine.endpoint?.audDevManager()?.captureDevMedia
+            capture?.adjustTxLevel(0.0f)
+            capture?.stopTransmit(audioMedia)
+        } catch (e: Exception) {
+            Log.e("SipAudio", "Failed to mute audio", e)
         }
     }
 
@@ -74,22 +94,35 @@ class SipAudio(
         if (audioMedia == null) return
         try {
             isMute = false
-            audioMedia!!.adjustTxLevel(2.0f)
-            sipService.sipEngine.endpoint?.audDevManager()?.captureDevMedia?.adjustTxLevel(2.0f)
-            sipService.sipEngine.endpoint?.audDevManager()?.captureDevMedia?.startTransmit(audioMedia)
-        } catch (_: Exception) {
+            audioMedia!!.adjustTxLevel(1.0f)
+            val capture = sipService.sipEngine.endpoint?.audDevManager()?.captureDevMedia
+            capture?.adjustTxLevel(1.0f)
+            capture?.startTransmit(audioMedia)
+        } catch (e: Exception) {
+            Log.e("SipAudio", "Failed to enable mic", e)
         }
     }
 
     fun setSpeaker(isLoudSpeaker: Boolean) {
-        val audDevManager: AudDevManager = sipService.sipEngine.endpoint!!.audDevManager()
         try {
-            if (isLoudSpeaker) {
-                audDevManager.outputRoute = pjmedia_aud_dev_route.PJMEDIA_AUD_DEV_ROUTE_LOUDSPEAKER
+            val adm: AudDevManager = sipService.sipEngine.endpoint!!.audDevManager()
+            adm.outputRoute = if (isLoudSpeaker) {
+                pjmedia_aud_dev_route.PJMEDIA_AUD_DEV_ROUTE_LOUDSPEAKER
             } else {
-                audDevManager.outputRoute = pjmedia_aud_dev_route.PJMEDIA_AUD_DEV_ROUTE_EARPIECE
+                pjmedia_aud_dev_route.PJMEDIA_AUD_DEV_ROUTE_EARPIECE
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.e("SipAudio", "Failed to change speaker route", e)
+        }
+    }
+
+    fun reconfigureAudioDevices(captureId: Int = 0, playbackId: Int = 0) {
+        try {
+            val adm = sipService.sipEngine.endpoint?.audDevManager()
+            adm?.setCaptureDev(captureId)
+            adm?.setPlaybackDev(playbackId)
+        } catch (e: Exception) {
+            Log.e("SipAudio", "Failed to reconfigure audio devices", e)
         }
     }
 }

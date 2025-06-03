@@ -4,6 +4,7 @@ import android.view.SurfaceView
 import com.breakreasi.voip_android_2.rests.ResponseInitConfigModel
 import com.breakreasi.voip_android_2.rests.ResponseModel
 import com.breakreasi.voip_android_2.rests.Rests
+import com.breakreasi.voip_android_2.voip.Voip
 import io.agora.rtc2.Constants
 import io.agora.rtc2.RtcEngine
 import io.agora.rtc2.RtcEngineConfig
@@ -27,9 +28,10 @@ class AgoraEngine(
     private var eventListener: AgoraEngineEventListener? = null
     private var localVideo: SurfaceView? = null
     private var remoteVideo: SurfaceView? = null
+    lateinit var voip: Voip
 
     init {
-        rests = Rests(agoraService)
+        rests = Rests()
         uid = generateRandom(8).toInt()
         eventListener = AgoraEngineEventListener()
     }
@@ -44,30 +46,19 @@ class AgoraEngine(
         return String(digits).toLong()
     }
 
-    fun configure(displayName: String, channel: String, userToken: String, withVideo: Boolean) {
+    fun configure(voip: Voip, displayName: String, channel: String, userToken: String, withVideo: Boolean) {
+        this.voip = voip
         this.displayName = displayName
         this.channel = channel
         this.userToken = userToken
         this.withVideo = withVideo
-        rests!!.initConfig(object :
-            Callback<ResponseInitConfigModel?> {
-            override fun onResponse(
-                call: Call<ResponseInitConfigModel?>,
-                response: Response<ResponseInitConfigModel?>
-            ) {
-                if (response.code() == 200 || response.code() == 201) {
-                    val body: ResponseInitConfigModel? = response.body()
-                    configureRtc(body!!.agora_app_id)
-                }
+        rests!!.initConfig {
+            if (it != null) {
+                configureRtc(it.agora_app_id)
+            } else {
                 eventListener!!.onAgoraStatus("failed")
             }
-            override fun onFailure(
-                call: Call<ResponseInitConfigModel?>,
-                t: Throwable
-            ) {
-                eventListener!!.onAgoraStatus("failed")
-            }
-        })
+        }
     }
 
     fun configureRtc(agoraId: String) {
@@ -81,7 +72,7 @@ class AgoraEngine(
                 setChannelProfile(Constants.CHANNEL_PROFILE_COMMUNICATION_1v1)
                 setClientRole(Constants.CLIENT_ROLE_BROADCASTER)
             }
-        } catch (ignored: Exception) {
+        } catch (_: Exception) {
         }
     }
 
@@ -105,6 +96,16 @@ class AgoraEngine(
             rtcEngine?.setDefaultAudioRoutetoSpeakerphone(false)
             rtcEngine?.setEnableSpeakerphone(false)
         }
+    }
+
+    fun call() {
+//        rests.makeCall(
+//            voip.destination,
+//            voip.displayName,
+//            userToken,
+//            withVideo,
+//            "agora"
+//        ) {  }
     }
 
     fun joinChannel() {
@@ -159,27 +160,16 @@ class AgoraEngine(
 
     fun accept() {
         if (rtcEngine == null) return
-        rests!!.acceptCall(
+        rests!!.acceptCall (
             userToken,
-            channel,
-            object : Callback<ResponseModel?> {
-                override fun onResponse(
-                    call: Call<ResponseModel?>,
-                    response: Response<ResponseModel?>
-                ) {
-                    if (response.code() == 200 || response.code() == 201) {
-                        setVideoConfiguration()
-                        startPreview()
-                        joinChannel()
-                    }
-                }
-
-                override fun onFailure(
-                    call: Call<ResponseModel?>,
-                    t: Throwable
-                ) {
-                }
-            })
+            channel
+        ) {
+            if (it != null) {
+                setVideoConfiguration()
+                startPreview()
+                joinChannel()
+            }
+        }
     }
 
     fun hangup() {
@@ -188,20 +178,11 @@ class AgoraEngine(
             rtcEngine!!.leaveChannel()
         }
         rests!!.rejectCall(
-            userToken,
-            object : Callback<ResponseModel?> {
-                override fun onResponse(
-                    call: Call<ResponseModel?>,
-                    response: Response<ResponseModel?>
-                ) {
-                }
-
-                override fun onFailure(
-                    call: Call<ResponseModel?>,
-                    t: Throwable
-                ) {
-                }
-            })
+            userToken
+        ) {
+            if (it != null) {
+            }
+        }
     }
 
     fun destroy() {

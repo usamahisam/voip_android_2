@@ -1,10 +1,10 @@
 package com.breakreasi.voip_android_2.sip
 
-import org.pjsip.pjsua2.AudioMedia
+import android.util.Log
+import com.breakreasi.voip_android_2.voip.VoipType
 import org.pjsip.pjsua2.Call
 import org.pjsip.pjsua2.CallOpParam
 import org.pjsip.pjsua2.CallVidSetStreamParam
-import org.pjsip.pjsua2.Media
 import org.pjsip.pjsua2.OnCallMediaEventParam
 import org.pjsip.pjsua2.OnCallMediaStateParam
 import org.pjsip.pjsua2.OnCallStateParam
@@ -25,31 +25,40 @@ class SipCall(
     private val account: SipAccount,
     callId: Int? = null
 ): Call(account, callId ?: -1) {
+    var currentState: Int? = null
     var withVideo: Boolean = false
 
     override fun onCallState(prm: OnCallStateParam?) {
         try {
             when (info.state) {
+                pjsip_inv_state.PJSIP_INV_STATE_INCOMING -> {
+                    makeRinging()
+                    withVideo = info.remVideoCount > 0
+                    sipService.voip.withVideo = withVideo
+                    sipService.voip.notificationCallService(VoipType.SIP, sipService.sipAccount.displayName!!, withVideo, "")
+                    sipService.voip.notifyCallStatus("incoming")
+                }
                 pjsip_inv_state.PJSIP_INV_STATE_CALLING -> {
-                    sipService.notifyStatus("Calling...")
+                    sipService.voip.notifyCallStatus("calling")
                 }
                 pjsip_inv_state.PJSIP_INV_STATE_EARLY -> {
-                    sipService.notifyStatus("Ringing...")
+                    sipService.voip.notifyCallStatus("ringing")
                 }
                 pjsip_inv_state.PJSIP_INV_STATE_CONNECTING -> {
-                    sipService.notifyStatus("Connecting...")
+                    sipService.voip.notifyCallStatus("connecting")
                 }
                 pjsip_inv_state.PJSIP_INV_STATE_CONFIRMED -> {
-                    sipService.notifyStatus("Connected")
+                    sipService.voip.notifyCallStatus("connected")
+                    sipService.sipAudio.setSpeaker(withVideo)
                 }
                 pjsip_inv_state.PJSIP_INV_STATE_DISCONNECTED -> {
-                    sipService.notifyStatus("Disconnected")
-                    sipService.sipAudio.stop()
-                    sipService.sipVideo.stop()
-                    delete()
+                    if (currentState != pjsip_inv_state.PJSIP_INV_STATE_CALLING) {
+                        disconnected()
+                    }
                 }
                 pjsip_inv_state.PJSIP_INV_STATE_NULL -> {}
             }
+            currentState = info.state
         } catch (_: Exception) {
         }
     }
@@ -131,8 +140,11 @@ class SipCall(
     }
 
     fun accept() {
-        val callOpParam = CallOpParam().apply {
-            statusCode = pjsip_status_code.PJSIP_SC_OK
+        val callOpParam = CallOpParam()
+        callOpParam.statusCode = pjsip_status_code.PJSIP_SC_OK
+        callOpParam.opt.audioCount = 1
+        if (withVideo) {
+            callOpParam.opt.videoCount = 1
         }
         callOpParam.opt.reqKeyframeMethod = pjsua_vid_req_keyframe_method.PJSUA_VID_REQ_KEYFRAME_RTCP_PLI.toLong()
         try {
@@ -142,10 +154,9 @@ class SipCall(
     }
 
     fun decline() {
+        val callOpParam = CallOpParam()
+        callOpParam.statusCode = pjsip_status_code.PJSIP_SC_DECLINE
         try {
-            val callOpParam = CallOpParam().apply {
-                statusCode = pjsip_status_code.PJSIP_SC_DECLINE
-            }
             hangup(callOpParam)
         } catch (_: Exception) {
         }
@@ -159,5 +170,13 @@ class SipCall(
             )
         } catch (_: Exception) {
         }
+    }
+
+    private fun disconnected() {
+        sipService.voip.stopNotificationCallService()
+//        sipService.sipAudio.stop()
+        sipService.sipVideo.stop()
+        sipService.voip.notifyCallStatus("disconnected")
+        account.delete()
     }
 }

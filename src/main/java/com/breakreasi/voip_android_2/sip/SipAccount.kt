@@ -1,5 +1,9 @@
 package com.breakreasi.voip_android_2.sip
 
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
+import com.breakreasi.voip_android_2.voip.VoipType
 import org.pjsip.pjsua2.Account
 import org.pjsip.pjsua2.AccountConfig
 import org.pjsip.pjsua2.AuthCredInfo
@@ -9,6 +13,7 @@ import org.pjsip.pjsua2.OnRegStartedParam
 import org.pjsip.pjsua2.OnRegStateParam
 import org.pjsip.pjsua2.pj_constants_
 import org.pjsip.pjsua2.pjmedia_srtp_use
+import org.pjsip.pjsua2.pjmedia_type
 import org.pjsip.pjsua2.pjsip_status_code
 
 class SipAccount(
@@ -17,6 +22,9 @@ class SipAccount(
     var accCfg: AccountConfig ?= null
     var host: String ?= null
     var port: Int ?= null
+    var displayName: String ?= null
+    var username: String ?= null
+    var password: String ?= null
     var call: SipCall ?= null
     var destination: String = ""
     var withVideo: Boolean = false
@@ -26,7 +34,7 @@ class SipAccount(
 
     override fun onRegState(prm: OnRegStateParam?) {
         val status = checkAccountStatus()
-        sipService.notifyAccountStatus(status)
+        sipService.voip.notifyAccountStatus(status)
         if (prm?.code == pjsip_status_code.PJSIP_SC_OK) {
             println("Registration successful: $status")
         } else {
@@ -34,30 +42,44 @@ class SipAccount(
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     override fun onIncomingCall(prm: OnIncomingCallParam?) {
-        call = SipCall(sipService, this, prm?.callId).apply {
-            makeRinging()
+        if (call != null) {
+            call?.delete()
         }
+        call = SipCall(sipService, this, prm?.callId)
     }
 
-    fun auth(host: String?, port: Int?, displayName: String, username: String, password: String) {
-        auth(host, port, displayName, username, password, "", false)
-    }
-
-    fun auth(host: String?, port: Int?, displayName: String, username: String, password: String, destination: String, withVideo: Boolean) {
+    fun auth(host: String, port: Int, displayName: String, username: String, password: String, destination: String, withVideo: Boolean) {
+        this.host = host
+        this.port = port
+        this.displayName = displayName
+        this.username = username
+        this.password = password
         this.destination = destination
         this.withVideo = withVideo
         if (checkIsCreated()) {
+            sipService.voip.notifyAccountStatus("success")
             if (this.destination.isNotEmpty()) {
                 newCall().makeCall(this.destination, withVideo)
             }
             return
         }
+        sipService.sipRest.register(username, password, object : SipRestResponseCallback<SipRestResponse> {
+            override fun onResponse(response: SipRestResponse?) {
+                if (response != null && response.status == "success") {
+                    createAccount(displayName, username, password, destination, withVideo)
+                } else {
+                    sipService.voip.notifyAccountStatus("failed")
+                }
+            }
+        })
+    }
+
+    private fun createAccount(displayName: String, username: String, password: String, destination: String, withVideo: Boolean): Boolean {
         val credArray = AuthCredInfoVector()
         val cred = AuthCredInfo("digest", "*", username, 0, password)
         credArray.add(cred)
-        this.host = host
-        this.port = port
         accCfg = AccountConfig().apply {
             idUri = "\"$displayName\" <sip:$username@${host}:${port}>"
             sipConfig.authCreds = credArray
@@ -71,6 +93,8 @@ class SipAccount(
             videoConfig.autoShowIncoming = true
             natConfig.iceEnabled = false
             natConfig.turnEnabled = false
+            natConfig.sdpNatRewriteUse = pj_constants_.PJ_FALSE
+            natConfig.viaRewriteUse = pj_constants_.PJ_FALSE
             natConfig.sipStunUse = pj_constants_.PJ_FALSE
             natConfig.mediaStunUse = pj_constants_.PJ_FALSE
             mediaConfig.srtpUse = pjmedia_srtp_use.PJMEDIA_SRTP_OPTIONAL
@@ -80,10 +104,6 @@ class SipAccount(
             callConfig.timerSessExpiresSec = 300
             callConfig.timerMinSESec = 90
         }
-    }
-
-    fun createAccount(): Boolean {
-        if (checkIsCreated()) return true
         return try {
             create(accCfg)
             true
@@ -102,18 +122,23 @@ class SipAccount(
             handleAccountSuccess()
             return "Account ID: ${info.id}, Reg Status: ${info.regStatusText}"
         } catch (e: Exception) {
+            sipService.voip.notifyAccountStatus("blocked")
             return "Account not created or failed: ${e.message}"
         }
     }
 
     private fun handleAccountSuccess() {
+        sipService.voip.notifyAccountStatus("success")
         if (this.destination.isNotEmpty()) {
             newCall().makeCall(destination, withVideo)
         }
     }
 
     fun newCall(): SipCall {
-        call = SipCall(sipService,this)
+        if (call != null) {
+            call?.delete()
+        }
+        call = SipCall(sipService, this)
         return call as SipCall
     }
 

@@ -30,4 +30,15 @@ public interface RestsRepo {
             @Field("token") String token
     );
 
+    @POST("user-receiver/call")
+    @FormUrlEncoded
+    Call<ReceiverResponse> makeCall(
+            @Field("X-API-KEY") String API_KEY,
+            @Field("whatsapp") String whatsapp,
+            @Field("lokasi") String lokasi,
+            @Field("token") String token,
+            @Field("with_video") boolean withVideo,
+            @Field("type") String type
+    );
+
 }

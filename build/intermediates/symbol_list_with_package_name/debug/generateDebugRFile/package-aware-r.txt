@@ -1,0 +1,9 @@
+com.breakreasi.voip_android_2
+drawable btn_endcall
+drawable btn_endcall_normal
+drawable btn_endcall_pressed
+drawable btn_startcall
+drawable btn_startcall_normal
+drawable btn_startcall_pressed
+raw basic_ring
+raw basic_tones
