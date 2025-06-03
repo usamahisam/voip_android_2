@@ -26,10 +26,21 @@ class SipCall(
     callId: Int? = null
 ): Call(account, callId ?: -1) {
     var currentState: Int? = null
+    var isCall: Boolean = false
     var withVideo: Boolean = false
+
+    init {
+        isCall = false
+    }
 
     override fun onCallState(prm: OnCallStateParam?) {
         try {
+            if (info.state == pjsip_inv_state.PJSIP_INV_STATE_NULL
+                || info.state == pjsip_inv_state.PJSIP_INV_STATE_DISCONNECTED) {
+                isCall = false
+            } else {
+                isCall = true
+            }
             when (info.state) {
                 pjsip_inv_state.PJSIP_INV_STATE_INCOMING -> {
                     makeRinging()

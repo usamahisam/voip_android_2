@@ -89,6 +89,13 @@ class Voip(
         }
     }
 
+    fun callIsOn(): Boolean {
+        if (voipServiceConnection.sipService != null) {
+            return voipServiceConnection.sipService?.callIsOn() == true
+        }
+        return false
+    }
+
     fun makeCall(destination: String, withVideo: Boolean) {
         if (type == VoipType.SIP) {
             voipServiceConnection.sipService?.call(destination, withVideo)
@@ -148,6 +155,7 @@ class Voip(
 
     fun notificationCallService(type: VoipType, displayName: String, withVideo: Boolean, token: String) {
         if (!withNotification) return
+        if (callIsOn()) return
         VoipManager.voip = this
         voipServiceConnection.startServiceNotification(type, displayName, withVideo, token)
     }

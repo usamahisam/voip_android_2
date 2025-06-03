@@ -142,6 +142,11 @@ class SipAccount(
         return call as SipCall
     }
 
+    fun checkIsCall(): Boolean {
+        if (call == null) return false
+        return call?.isCall == true
+    }
+
     fun logout() {
         if (call != null) {
             try {

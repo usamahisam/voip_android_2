@@ -16,7 +16,7 @@ class SipService : Service() {
     val port: Int = 5160
     lateinit var sipEngine: SipEngine
     lateinit var sipRest: SipRest
-    lateinit var sipAccount: SipAccount
+    var sipAccount: SipAccount? = null
     lateinit var sipAudio: SipAudio
     lateinit var sipCamera: SipCamera
     lateinit var sipVideo: SipVideo
@@ -46,23 +46,29 @@ class SipService : Service() {
     fun auth(voip: Voip, displayName: String, username: String, password: String, destination: String, withVideo: Boolean) {
         this.voip = voip
         sipAccount = SipAccount(this)
-        sipAccount.auth(host, port, displayName, username, password, destination, withVideo)
+        sipAccount?.auth(host, port, displayName, username, password, destination, withVideo)
     }
 
     fun call(user: String, withVideo: Boolean) {
-        sipAccount.newCall().makeCall(user, withVideo)
+        sipAccount!!.newCall().makeCall(user, withVideo)
+    }
+
+    fun callIsOn(): Boolean {
+        if (sipAccount == null) return false
+        if (sipAccount?.call == null) return false
+        return sipAccount!!.checkIsCall()
     }
 
     fun accept() {
-        sipAccount.call?.accept()
+        sipAccount!!.call?.accept()
     }
 
     fun decline() {
-        sipAccount.call?.decline()
+        sipAccount!!.call?.decline()
     }
 
     fun hangup() {
-        sipAccount.call?.decline();
+        sipAccount!!.call?.decline();
     }
 
     fun mic() {
@@ -94,7 +100,7 @@ class SipService : Service() {
     }
 
     override fun onDestroy() {
-        sipAccount.logout()
+        sipAccount!!.logout()
         sipEngine.destroy()
         super.onDestroy()
     }
