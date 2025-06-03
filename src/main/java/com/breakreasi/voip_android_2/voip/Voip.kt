@@ -32,6 +32,7 @@ class Voip(
         this.destination = destination
         this.withVideo = withVideo
         this.withNotification = withNotification
+        engineStart()
     }
 
     fun auth(displayName: String, channel: String, userToken: String, withVideo: Boolean, withNotification: Boolean) {
@@ -41,9 +42,10 @@ class Voip(
         this.userToken = userToken
         this.withVideo = withVideo
         this.withNotification = withNotification
+        engineStart()
     }
 
-    fun engineStart() {
+    private fun engineStart() {
         voipServiceConnection.start()
     }
 

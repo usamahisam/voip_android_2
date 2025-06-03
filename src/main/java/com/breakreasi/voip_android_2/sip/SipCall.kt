@@ -1,5 +1,6 @@
 package com.breakreasi.voip_android_2.sip
 
+import android.util.Log
 import com.breakreasi.voip_android_2.voip.VoipType
 import org.pjsip.pjsua2.Call
 import org.pjsip.pjsua2.CallOpParam
@@ -39,6 +40,11 @@ class SipCall(
                 isCall = false
             } else {
                 isCall = true
+            }
+            if (currentState == pjsip_inv_state.PJSIP_INV_STATE_CALLING
+                && info.lastStatusCode == 404) {
+                disconnected()
+                return
             }
             when (info.state) {
                 pjsip_inv_state.PJSIP_INV_STATE_INCOMING -> {
