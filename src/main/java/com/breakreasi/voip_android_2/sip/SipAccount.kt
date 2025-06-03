@@ -138,17 +138,4 @@ class SipAccount(
         if (call == null) return false
         return call?.isCall == true
     }
-
-    fun logout() {
-        if (call != null) {
-            try {
-                call?.delete()
-            } catch (_: Exception) {
-            }
-        }
-        try {
-            delete()
-        } catch (_: Exception) {
-        }
-    }
 }

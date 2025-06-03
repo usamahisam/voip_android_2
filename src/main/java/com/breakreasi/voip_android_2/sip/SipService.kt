@@ -101,8 +101,15 @@ class SipService : Service() {
         sipVideo.toggleSurfaceRemoteFit()
     }
 
+    fun deleteAccount() {
+        if (sipAccount != null) {
+            sipAccount!!.delete()
+            sipAccount = null
+        }
+    }
+
     override fun onDestroy() {
-        sipAccount!!.logout()
+        deleteAccount()
         sipEngine.destroy()
         super.onDestroy()
     }

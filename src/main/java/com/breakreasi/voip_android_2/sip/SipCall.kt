@@ -205,6 +205,6 @@ class SipCall(
 //        sipService.sipAudio.stop()
         sipService.sipVideo.stop()
         sipService.voip.notifyCallStatus("disconnected")
-        account.delete()
+        sipService.deleteAccount()
     }
 }
