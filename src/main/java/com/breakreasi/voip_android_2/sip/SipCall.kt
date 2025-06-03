@@ -46,7 +46,7 @@ class SipCall(
                     makeRinging()
                     withVideo = info.remVideoCount > 0
                     sipService.voip.withVideo = withVideo
-                    sipService.voip.notificationCallService(VoipType.SIP, sipService.sipAccount.displayName!!, withVideo, "")
+                    sipService.voip.notificationCallService(VoipType.SIP, sipService.sipAccount!!.displayName!!, withVideo, "")
                     sipService.voip.notifyCallStatus("incoming")
                 }
                 pjsip_inv_state.PJSIP_INV_STATE_CALLING -> {
