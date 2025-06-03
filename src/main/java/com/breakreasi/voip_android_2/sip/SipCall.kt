@@ -1,6 +1,5 @@
 package com.breakreasi.voip_android_2.sip
 
-import android.util.Log
 import com.breakreasi.voip_android_2.voip.VoipType
 import org.pjsip.pjsua2.Call
 import org.pjsip.pjsua2.CallOpParam
@@ -43,7 +42,7 @@ class SipCall(
             }
             when (info.state) {
                 pjsip_inv_state.PJSIP_INV_STATE_INCOMING -> {
-                    makeRinging()
+                    sendRinging()
                     withVideo = info.remVideoCount > 0
                     sipService.voip.withVideo = withVideo
                     sipService.voip.notificationCallService(VoipType.SIP, sipService.sipAccount!!.displayName!!, withVideo, "")
@@ -140,12 +139,23 @@ class SipCall(
         }
     }
 
-    fun makeRinging() {
+    fun sendRinging() {
         try {
             val callOpParam = CallOpParam().apply {
                 statusCode = pjsip_status_code.PJSIP_SC_RINGING
             }
             answer(callOpParam)
+        } catch (_: Exception) {
+        }
+    }
+
+    fun sendBusy() {
+        try {
+            val callOpParam = CallOpParam().apply {
+                statusCode = pjsip_status_code.PJSIP_SC_BUSY_HERE
+            }
+            answer(callOpParam)
+            disconnected()
         } catch (_: Exception) {
         }
     }
