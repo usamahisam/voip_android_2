@@ -35,12 +35,6 @@ class SipCall(
 
     override fun onCallState(prm: OnCallStateParam?) {
         try {
-            if (info.state == pjsip_inv_state.PJSIP_INV_STATE_NULL
-                || info.state == pjsip_inv_state.PJSIP_INV_STATE_DISCONNECTED) {
-                isCall = false
-            } else {
-                isCall = true
-            }
             if (currentState == pjsip_inv_state.PJSIP_INV_STATE_CALLING
                 && info.lastStatusCode == 404) {
                 isCall = false
@@ -49,6 +43,7 @@ class SipCall(
             }
             when (info.state) {
                 pjsip_inv_state.PJSIP_INV_STATE_INCOMING -> {
+                    isCall = false
                     sendRinging()
                     withVideo = info.remVideoCount > 0
                     sipService.voip.withVideo = withVideo
@@ -56,19 +51,24 @@ class SipCall(
                     sipService.voip.notifyCallStatus("incoming")
                 }
                 pjsip_inv_state.PJSIP_INV_STATE_CALLING -> {
+                    isCall = false
                     sipService.voip.notifyCallStatus("calling")
                 }
                 pjsip_inv_state.PJSIP_INV_STATE_EARLY -> {
+                    isCall = false
                     sipService.voip.notifyCallStatus("ringing")
                 }
                 pjsip_inv_state.PJSIP_INV_STATE_CONNECTING -> {
+                    isCall = false
                     sipService.voip.notifyCallStatus("connecting")
                 }
                 pjsip_inv_state.PJSIP_INV_STATE_CONFIRMED -> {
+                    isCall = true
                     sipService.voip.notifyCallStatus("connected")
                     sipService.sipAudio.setSpeaker(withVideo)
                 }
                 pjsip_inv_state.PJSIP_INV_STATE_DISCONNECTED -> {
+                    isCall = false
                     if (currentState != pjsip_inv_state.PJSIP_INV_STATE_CALLING) {
                         disconnected()
                     }
