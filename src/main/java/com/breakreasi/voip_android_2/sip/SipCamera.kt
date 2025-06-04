@@ -1,5 +1,6 @@
 package com.breakreasi.voip_android_2.sip
 
+import android.os.Build
 import org.pjsip.pjsua2.CallVidSetStreamParam
 import org.pjsip.pjsua2.pjmedia_orient
 import org.pjsip.pjsua2.pjsua_call_vid_strm_op
@@ -14,14 +15,32 @@ class SipCamera(
 
     fun configure() {
         val vidMgr = sipService.sipEngine.endpoint!!.vidDevManager()
+        var frontFound = false
+        var backFound = false
+
         try {
             val devices = vidMgr.enumDev2()
             for (dev in devices) {
-                if (dev.name.contains("camera")) {
-                    if (dev.name.lowercase(Locale.getDefault()).contains("front")) {
+                val name = dev.name.lowercase(Locale.getDefault())
+                if (name.contains("camera")) {
+                    if (!frontFound && name.contains("front")) {
                         frontCamera = dev.id
-                    } else if (dev.name.lowercase(Locale.getDefault()).contains("back")) {
+                        frontFound = true
+                    } else if (!backFound && name.contains("back")) {
                         backCamera = dev.id
+                        backFound = true
+                    }
+                }
+            }
+            for (dev in devices) {
+                val name = dev.name.lowercase(Locale.getDefault())
+                if (name.contains("camera")) {
+                    if (!frontFound) {
+                        frontCamera = dev.id
+                        frontFound = true
+                    } else if (!backFound && dev.id != frontCamera) {
+                        backCamera = dev.id
+                        backFound = true
                     }
                 }
             }
@@ -32,15 +51,15 @@ class SipCamera(
     }
 
     fun setOrientation() {
-        try {
-            if (isFrontCamera) {
-                sipService.sipEngine.endpoint!!.vidDevManager().setCaptureOrient(frontCamera, pjmedia_orient.PJMEDIA_ORIENT_ROTATE_270DEG, true)
-            } else {
-                sipService.sipEngine.endpoint!!.vidDevManager().setCaptureOrient(backCamera, pjmedia_orient.PJMEDIA_ORIENT_ROTATE_270DEG, true)
-            }
-        } catch (_: Exception) {
+        val orient = if (Build.MANUFACTURER.equals("samsung", ignoreCase = true)) {
+            pjmedia_orient.PJMEDIA_ORIENT_ROTATE_90DEG
+        } else {
+            pjmedia_orient.PJMEDIA_ORIENT_ROTATE_270DEG
         }
+        val camId = if (isFrontCamera) frontCamera else backCamera
+        sipService.sipEngine.endpoint!!.vidDevManager().setCaptureOrient(camId, orient, true)
     }
+
 
     fun switchCamera(isFrontCamera: Boolean) {
         this.isFrontCamera = isFrontCamera

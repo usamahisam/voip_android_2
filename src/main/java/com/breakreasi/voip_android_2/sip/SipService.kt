@@ -69,10 +69,6 @@ class SipService : Service() {
         sipAccount!!.call?.decline()
     }
 
-    fun hangup() {
-        sipAccount!!.call?.decline();
-    }
-
     fun mic() {
         sipAudio.mic()
     }

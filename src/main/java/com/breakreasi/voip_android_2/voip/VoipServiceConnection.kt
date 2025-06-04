@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Build
 import android.os.IBinder
-import android.util.Log
 import com.breakreasi.voip_android_2.agora.AgoraService
 import com.breakreasi.voip_android_2.sip.SipService
 
@@ -25,7 +24,7 @@ class VoipServiceConnection(
         } else if (name?.shortClassName == AgoraService::class.java.simpleName) {
             val binder: AgoraService.LocalBinder = service as AgoraService.LocalBinder
             agoraService = binder.getService()
-            agoraService?.configure(voip, voip.displayName, voip.channel, voip.userToken, voip.withVideo)
+            agoraService?.start(voip, voip.displayName, voip.channel, voip.userToken, voip.withVideo)
         } else if (name?.shortClassName == VoipNotificationService::class.java.simpleName) {
             val binder: VoipNotificationService.LocalBinder = service as VoipNotificationService.LocalBinder
             voipNotificationService = binder.getService()
@@ -47,7 +46,7 @@ class VoipServiceConnection(
             startService(SipService::class.java)
         }
         if (agoraService != null) {
-            agoraService?.configure(voip, voip.displayName, voip.channel, voip.userToken, voip.withVideo)
+            agoraService?.start(voip, voip.displayName, voip.channel, voip.userToken, voip.withVideo)
         } else {
             startService(AgoraService::class.java)
         }

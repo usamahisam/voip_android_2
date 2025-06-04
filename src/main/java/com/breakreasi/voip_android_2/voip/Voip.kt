@@ -106,7 +106,8 @@ class Voip(
         if (type == VoipType.SIP) {
             voipServiceConnection.sipService?.call(destination, withVideo)
         } else if (type == VoipType.AGORA) {
-            voipServiceConnection.agoraService?.call()
+            // still disable this function
+            // voipServiceConnection.agoraService?.call()
         }
     }
 
@@ -114,7 +115,7 @@ class Voip(
         if (type == VoipType.SIP) {
             voipServiceConnection.sipService?.accept()
         } else if (type == VoipType.AGORA) {
-//            voipServiceConnection.agoraService?.accept()
+            voipServiceConnection.agoraService?.accept()
         }
     }
 
@@ -122,7 +123,7 @@ class Voip(
         if (type == VoipType.SIP) {
             voipServiceConnection.sipService?.decline()
         } else if (type == VoipType.AGORA) {
-//            voipServiceConnection.agoraService?.decline()
+            voipServiceConnection.agoraService?.decline()
         }
     }
 
@@ -134,6 +135,11 @@ class Voip(
                 voipServiceConnection.sipService?.mic()
             }
         } else if (type == VoipType.AGORA) {
+            if (mute) {
+                voipServiceConnection.agoraService?.mute()
+            } else {
+                voipServiceConnection.agoraService?.mic()
+            }
         }
     }
 
@@ -141,6 +147,7 @@ class Voip(
         if (type == VoipType.SIP) {
             voipServiceConnection.sipService?.switchCamera()
         } else if (type == VoipType.AGORA) {
+            voipServiceConnection.agoraService?.switchCamera()
         }
     }
 
@@ -156,6 +163,8 @@ class Voip(
             voipServiceConnection.sipService?.videoSurfaceLocal(localSurface)
             voipServiceConnection.sipService?.videoSurfaceRemote(remoteSurface)
         } else if (type == VoipType.AGORA) {
+            voipServiceConnection.agoraService?.videoSurfaceLocal(localSurface)
+            voipServiceConnection.agoraService?.videoSurfaceRemote(remoteSurface)
         }
     }
 

@@ -1,18 +1,14 @@
 package com.breakreasi.voip_android_2.agora
 
 import android.view.SurfaceView
-import com.breakreasi.voip_android_2.rests.ResponseInitConfigModel
-import com.breakreasi.voip_android_2.rests.ResponseModel
 import com.breakreasi.voip_android_2.rests.Rests
 import com.breakreasi.voip_android_2.voip.Voip
+import com.breakreasi.voip_android_2.voip.VoipType
 import io.agora.rtc2.Constants
 import io.agora.rtc2.RtcEngine
 import io.agora.rtc2.RtcEngineConfig
 import io.agora.rtc2.video.VideoCanvas
 import io.agora.rtc2.video.VideoEncoderConfiguration
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import java.util.Random
 
 class AgoraEngine(
@@ -24,7 +20,7 @@ class AgoraEngine(
     private var channel: String? = null
     private var userToken: String? = null
     private var uid = 0
-    private var withVideo: Boolean = false
+    var withVideo: Boolean = false
     private var eventListener: AgoraEngineEventListener? = null
     private var localVideo: SurfaceView? = null
     private var remoteVideo: SurfaceView? = null
@@ -46,7 +42,15 @@ class AgoraEngine(
         return String(digits).toLong()
     }
 
-    fun configure(voip: Voip, displayName: String, channel: String, userToken: String, withVideo: Boolean) {
+    fun registerEventListener(listener: AgoraIEventListener) {
+        eventListener!!.registerEventListener(listener)
+    }
+
+    fun removeEventListener(listener: AgoraIEventListener) {
+        eventListener!!.removeEventListener(listener)
+    }
+
+    fun start(voip: Voip, displayName: String, channel: String, userToken: String, withVideo: Boolean) {
         this.voip = voip
         this.displayName = displayName
         this.channel = channel
@@ -72,16 +76,10 @@ class AgoraEngine(
                 setChannelProfile(Constants.CHANNEL_PROFILE_COMMUNICATION_1v1)
                 setClientRole(Constants.CLIENT_ROLE_BROADCASTER)
             }
+            setModeCall(withVideo)
+            voip.notificationCallService(VoipType.AGORA, displayName!!, withVideo, userToken!!)
         } catch (_: Exception) {
         }
-    }
-
-    fun registerEventListener(listener: AgoraIEventListener) {
-        eventListener!!.registerEventListener(listener)
-    }
-
-    fun removeEventListener(listener: AgoraIEventListener) {
-        eventListener!!.removeEventListener(listener)
     }
 
     fun setModeCall(withVideo: Boolean) {
@@ -98,21 +96,6 @@ class AgoraEngine(
         }
     }
 
-    fun call() {
-//        rests.makeCall(
-//            voip.destination,
-//            voip.displayName,
-//            userToken,
-//            withVideo,
-//            "agora"
-//        ) {  }
-    }
-
-    fun joinChannel() {
-        if (rtcEngine == null) return
-        rtcEngine!!.joinChannel(null, channel, "", uid)
-    }
-
     fun setVideoConfiguration() {
         if (rtcEngine == null) return
         rtcEngine!!.setVideoEncoderConfiguration(
@@ -123,6 +106,59 @@ class AgoraEngine(
                 VideoEncoderConfiguration.ORIENTATION_MODE.ORIENTATION_MODE_ADAPTIVE
             )
         )
+    }
+
+    fun joinChannel() {
+        if (rtcEngine == null) return
+        rtcEngine!!.joinChannel(null, channel, "", uid)
+    }
+
+    fun accept() {
+        if (rtcEngine == null) return
+        rests!!.acceptCall (
+            userToken,
+            channel
+        ) {
+            if (it != null) {
+                setVideoConfiguration()
+                startPreview()
+                joinChannel()
+            }
+        }
+    }
+
+    fun hangup() {
+        if (rtcEngine != null) {
+            rtcEngine!!.stopPreview()
+            rtcEngine!!.leaveChannel()
+        }
+        rests!!.rejectCall(
+            userToken
+        ) {
+            if (it != null) {
+            }
+        }
+    }
+
+    fun setMute(isMute: Boolean) {
+        if (rtcEngine == null) return
+        if (isMute) {
+            rtcEngine?.muteLocalAudioStream(true)
+        } else {
+            rtcEngine?.muteLocalAudioStream(false)
+        }
+    }
+
+    fun setLoudspeaker(isLoudspeaker: Boolean) {
+        if (isLoudspeaker) {
+            rtcEngine?.enableLocalAudio(true)
+        } else {
+            rtcEngine?.enableLocalAudio(false)
+        }
+    }
+
+    fun switchCamera() {
+        rtcEngine?.switchCamera()
     }
 
     fun setRemoteVideo(surfaceView: SurfaceView) {
@@ -156,33 +192,6 @@ class AgoraEngine(
     fun unsetRemoteVideo() {
         if (rtcEngine == null) return
         rtcEngine!!.setupRemoteVideo(null)
-    }
-
-    fun accept() {
-        if (rtcEngine == null) return
-        rests!!.acceptCall (
-            userToken,
-            channel
-        ) {
-            if (it != null) {
-                setVideoConfiguration()
-                startPreview()
-                joinChannel()
-            }
-        }
-    }
-
-    fun hangup() {
-        if (rtcEngine != null) {
-            rtcEngine!!.stopPreview()
-            rtcEngine!!.leaveChannel()
-        }
-        rests!!.rejectCall(
-            userToken
-        ) {
-            if (it != null) {
-            }
-        }
     }
 
     fun destroy() {
