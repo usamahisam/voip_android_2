@@ -1,13 +1,14 @@
 package com.breakreasi.voip_android_2.sip
 
+import android.media.AudioDeviceInfo
+import android.media.AudioManager
+import android.os.Build
 import android.util.Log
 import org.pjsip.pjsua2.AudDevManager
 import org.pjsip.pjsua2.AudioMedia
 import org.pjsip.pjsua2.CodecInfoVector2
 import org.pjsip.pjsua2.Media
 import org.pjsip.pjsua2.pjmedia_aud_dev_route
-import java.util.logging.Logger
-
 
 
 class SipAudio(
@@ -48,10 +49,11 @@ class SipAudio(
                 audioMedia.startTransmit(audDevManager.playbackDevMedia)
                 audDevManager.captureDevMedia.startTransmit(audioMedia)
             }
+            sipService.sipEngine.am!!.mode = AudioManager.MODE_IN_COMMUNICATION
+            setSpeaker(true)
         } catch (e: Exception) {
             Log.e("SipAudio", "Failed to start audio", e)
         }
-        setSpeaker(true)
     }
 
     fun stop() {
@@ -73,6 +75,7 @@ class SipAudio(
                 Log.w("SipAudio", "audioMedia is null or has invalid portId ($portId)")
             }
             audioMedia = null
+            sipService.sipEngine.am!!.mode = AudioManager.MODE_NORMAL
         } catch (e: Exception) {
             Log.e("SipAudio", "Failed to stop audio", e)
         }
@@ -107,10 +110,29 @@ class SipAudio(
     fun setSpeaker(isLoudSpeaker: Boolean) {
         try {
             val adm: AudDevManager = sipService.sipEngine.endpoint!!.audDevManager()
-            adm.outputRoute = if (isLoudSpeaker) {
-                pjmedia_aud_dev_route.PJMEDIA_AUD_DEV_ROUTE_LOUDSPEAKER
+            if (isLoudSpeaker) {
+                adm.outputRoute = pjmedia_aud_dev_route.PJMEDIA_AUD_DEV_ROUTE_LOUDSPEAKER
             } else {
-                pjmedia_aud_dev_route.PJMEDIA_AUD_DEV_ROUTE_EARPIECE
+                adm.outputRoute = pjmedia_aud_dev_route.PJMEDIA_AUD_DEV_ROUTE_EARPIECE
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val targetDevice = if (isLoudSpeaker) {
+                    sipService.sipEngine.am!!.availableCommunicationDevices.firstOrNull {
+                        it.type == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER
+                    }
+                } else {
+                    sipService.sipEngine.am!!.availableCommunicationDevices.firstOrNull {
+                        it.type == AudioDeviceInfo.TYPE_WIRED_HEADPHONES ||
+                                it.type == AudioDeviceInfo.TYPE_WIRED_HEADSET ||
+                                it.type == AudioDeviceInfo.TYPE_BUILTIN_EARPIECE
+                    }
+                }
+                targetDevice?.let {
+                    sipService.sipEngine.am!!.setCommunicationDevice(it)
+                }
+            } else {
+                @Suppress("DEPRECATION")
+                sipService.sipEngine.am!!.setSpeakerphoneOn(isLoudSpeaker)
             }
         } catch (_: Exception) {
         }

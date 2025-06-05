@@ -2,6 +2,7 @@ package com.breakreasi.voip_android_2.sip
 
 import android.content.Context
 import android.hardware.camera2.CameraManager
+import android.media.AudioManager
 import android.os.Build
 import org.pjsip.PjCameraInfo2
 import org.pjsip.pjsua2.EpConfig
@@ -13,11 +14,14 @@ import java.util.Locale
 class SipEngine(
     private val sipService: SipService
 ) {
+    var cm: CameraManager? = null
+    var am: AudioManager? = null
     var endpoint: SipEndpoint? = null
     private var epConfig: EpConfig? = null
 
     fun init(udpPort: Int? = null) {
-        val cm = sipService.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+        cm = sipService.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+        am = sipService.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         try {
             PjCameraInfo2.SetCameraManager(cm)
             endpoint = SipEndpoint().apply {
