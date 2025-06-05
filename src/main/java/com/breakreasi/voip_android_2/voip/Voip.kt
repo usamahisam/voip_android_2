@@ -1,14 +1,20 @@
 package com.breakreasi.voip_android_2.voip
 
+import android.app.Application
 import android.content.Context
 import android.util.Log
 import android.view.SurfaceView
 import android.widget.Toast
+import com.breakreasi.voip_android_2.history.HistoryEntity
+import com.breakreasi.voip_android_2.history.HistoryRepository
 import com.breakreasi.voip_android_2.tone.Tone
+import io.realm.kotlin.Realm
+import io.realm.kotlin.RealmConfiguration
 
 class Voip(
     val context: Context,
 ) {
+    private val voipDatabase: VoipDatabase = VoipDatabase()
     private val voipServiceConnection = VoipServiceConnection(this)
     private val voipNotificationCallbacks = mutableListOf<VoipNotificationCallback>()
     private val voipCallbacks = mutableListOf<VoipCallback>()
@@ -23,6 +29,10 @@ class Voip(
     var withNotification: Boolean = false
     var callFromNotification: Boolean = false
     private val tone: Tone = Tone()
+
+    fun history(): HistoryRepository {
+        return voipDatabase.historyRepository
+    }
 
     fun auth(displayName: String, username: String, password: String, destination: String, withVideo: Boolean, withNotification: Boolean) {
         this.type = VoipType.SIP
