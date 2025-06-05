@@ -68,8 +68,14 @@ class SipService : Service() {
     }
 
     fun decline() {
-        if (sipAccount == null) return
-        if (sipAccount!!.call == null) return
+        if (sipAccount == null) {
+            voip.notifyCallStatus("disconnected")
+            return
+        }
+        if (sipAccount!!.call == null) {
+            voip.notifyCallStatus("disconnected")
+            return
+        }
         sipAccount!!.call?.decline()
     }
 
