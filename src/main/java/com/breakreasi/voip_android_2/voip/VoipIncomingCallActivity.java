@@ -1,11 +1,13 @@
 package com.breakreasi.voip_android_2.voip;
 
+import android.annotation.SuppressLint;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.WindowManager;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,8 +20,10 @@ import com.breakreasi.voip_android_2.R;
 
 public class VoipIncomingCallActivity extends AppCompatActivity {
 
+    TextView tv_display_name, tv_call_status;
     AppCompatImageView btn_startcall, btn_endcall;
 
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,8 +51,13 @@ public class VoipIncomingCallActivity extends AppCompatActivity {
             return insets;
         });
 
+        tv_display_name = findViewById(R.id.tv_display_name);
+        tv_call_status = findViewById(R.id.tv_call_status);
         btn_startcall = findViewById(R.id.btn_startcall);
         btn_endcall = findViewById(R.id.btn_endcall);
+
+        tv_display_name.setText(getIntent().getStringExtra("displayName"));
+        tv_call_status.setText("Panggilan masuk...");
 
         btn_startcall.setOnClickListener(v -> {
             if (VoipManager.INSTANCE.getVoip() != null) {

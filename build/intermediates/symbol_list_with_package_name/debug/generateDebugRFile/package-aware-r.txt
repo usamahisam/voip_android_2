@@ -27,9 +27,7 @@ id btn_startcall
 id ivLogoCenter
 id llInsets1
 id llInsets2
-id local_video_view
 id main
-id remote_video_view
 id tv_call_status
 id tv_display_name
 layout activity_voip_incoming_call

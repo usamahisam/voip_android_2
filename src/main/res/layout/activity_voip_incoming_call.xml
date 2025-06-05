@@ -13,13 +13,6 @@
         android:layout_height="match_parent"
         tools:ignore="UselessParent">
 
-        <SurfaceView
-            android:id="@+id/remote_video_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:background="@android:color/transparent" />
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -44,13 +37,6 @@
                         android:adjustViewBounds="true"
                         android:layout_gravity="center"
                         tools:ignore="ContentDescription" />
-                    <SurfaceView
-                        android:id="@+id/local_video_view"
-                        android:layout_width="120dp"
-                        android:layout_height="176dp"
-                        android:layout_gravity="bottom|right"
-                        android:background="@android:color/transparent"
-                        tools:ignore="RtlHardcoded" />
                 </FrameLayout>
             </LinearLayout>
 

@@ -26,9 +26,7 @@ int id btn_startcall 0x0
 int id ivLogoCenter 0x0
 int id llInsets1 0x0
 int id llInsets2 0x0
-int id local_video_view 0x0
 int id main 0x0
-int id remote_video_view 0x0
 int id tv_call_status 0x0
 int id tv_display_name 0x0
 int layout activity_voip_incoming_call 0x0

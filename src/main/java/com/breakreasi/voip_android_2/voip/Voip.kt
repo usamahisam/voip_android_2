@@ -1,7 +1,13 @@
 package com.breakreasi.voip_android_2.voip
 
+import android.content.ContentResolver
 import android.content.Context
+import android.media.Ringtone
+import android.media.RingtoneManager
+import android.os.Build
 import android.view.SurfaceView
+import androidx.core.net.toUri
+import com.breakreasi.voip_android_2.R
 import com.breakreasi.voip_android_2.history.HistoryPreferences
 import com.breakreasi.voip_android_2.tone.Tone
 
@@ -22,6 +28,7 @@ class Voip(
     var withNotification: Boolean = false
     var callFromNotification: Boolean = false
     private val tone: Tone = Tone()
+    private var ringtone: Ringtone? = null
 
     fun auth(displayName: String, username: String, password: String, destination: String, withVideo: Boolean, withNotification: Boolean) {
         this.type = VoipType.SIP
@@ -176,17 +183,20 @@ class Voip(
 
     fun stopNotificationCallService() {
         if (!withNotification) return
+        stopRingtone()
         VoipManager.voip = this
         voipServiceConnection.stopServiceNotification()
     }
 
     fun handlerNotificationAccept() {
+        stopRingtone()
         voipServiceConnection.stopServiceNotification()
         callFromNotification = true
         notifyNotificationStatus("notification_accept")
     }
 
     fun handlerNotificationDecline(isMissed: Boolean = false) {
+        stopRingtone()
         decline()
         if (isMissed) {
             HistoryPreferences.save(context, displayName, "Missed Call")
@@ -196,6 +206,33 @@ class Voip(
         voipServiceConnection.stopServiceNotification()
         callFromNotification = true
         notifyNotificationStatus("notification_decline")
+    }
+
+    fun playRingtone() {
+        stopRingtone()
+        try {
+            val soundUri = (ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
+                    context.packageName + "/" + R.raw.basic_ring).toUri()
+            ringtone = RingtoneManager.getRingtone(context, soundUri)
+            if (ringtone != null && !ringtone!!.isPlaying) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    ringtone!!.isLooping = true
+                }
+                ringtone!!.play()
+            }
+        } catch (_: Exception) {
+        }
+    }
+
+    @Synchronized
+    fun stopRingtone() {
+        if (ringtone != null) {
+            try {
+                if (ringtone!!.isPlaying) ringtone!!.stop()
+            } catch (_: Exception) {
+            }
+            ringtone = null
+        }
     }
 
     fun destroy() {

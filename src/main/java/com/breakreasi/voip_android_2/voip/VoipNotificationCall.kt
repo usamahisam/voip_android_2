@@ -22,7 +22,6 @@ class VoipNotificationCall(
     private val context: Context
 ) {
     private val CHANNEL_ID: String = "VOIP_ANDROID_123456"
-    private var ringtone: Ringtone? = null
 
     fun notificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -125,7 +124,7 @@ class VoipNotificationCall(
             builder.setVibrate(longArrayOf(0, 1000, 1000))
         } else if (am?.getRingerMode() == AudioManager.RINGER_MODE_NORMAL) {
             builder.setVibrate(longArrayOf(0, 1000, 1000))
-//            playRingtone()
+            VoipManager.voip!!.playRingtone();
         }
         val notification = builder.build()
         notification.flags =
@@ -134,38 +133,10 @@ class VoipNotificationCall(
     }
 
     fun cancel(id: Int) {
-        stopRingtone()
         try {
             val notificationManager = context.getSystemService(NotificationManager::class.java)
             notificationManager.cancel(id)
         } catch (_: Exception) {
-        }
-    }
-
-    private fun playRingtone() {
-        stopRingtone()
-        try {
-            val soundUri = (ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
-                    context.packageName + "/" + R.raw.basic_ring).toUri()
-            ringtone = RingtoneManager.getRingtone(context, soundUri)
-            if (ringtone != null && !ringtone!!.isPlaying) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    ringtone!!.isLooping = true
-                }
-                ringtone!!.play()
-            }
-        } catch (_: Exception) {
-        }
-    }
-
-    @Synchronized
-    fun stopRingtone() {
-        if (ringtone != null) {
-            try {
-                if (ringtone!!.isPlaying) ringtone!!.stop()
-            } catch (_: Exception) {
-            }
-            ringtone = null
         }
     }
 }
