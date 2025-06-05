@@ -47,4 +47,7 @@ dependencies {
     implementation libs.core.ktx
     implementation(libs.retrofit)
     implementation(libs.retrofit2.converter.gson)
+    implementation libs.appcompat
+    implementation libs.activity
+    implementation libs.constraintlayout
 }

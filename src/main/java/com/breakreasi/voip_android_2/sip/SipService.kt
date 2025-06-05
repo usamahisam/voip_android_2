@@ -62,10 +62,14 @@ class SipService : Service() {
     }
 
     fun accept() {
+        if (sipAccount == null) return
+        if (sipAccount!!.call == null) return
         sipAccount!!.call?.accept()
     }
 
     fun decline() {
+        if (sipAccount == null) return
+        if (sipAccount!!.call == null) return
         sipAccount!!.call?.decline()
     }
 

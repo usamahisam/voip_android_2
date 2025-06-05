@@ -1,6 +1,7 @@
 package com.breakreasi.voip_android_2.sip
 
 import android.util.Log
+import com.breakreasi.voip_android_2.history.HistoryPreferences
 import com.breakreasi.voip_android_2.voip.VoipType
 import org.pjsip.pjsua2.Call
 import org.pjsip.pjsua2.CallOpParam
@@ -64,6 +65,7 @@ class SipCall(
                 }
                 pjsip_inv_state.PJSIP_INV_STATE_CONFIRMED -> {
                     isCall = true
+                    HistoryPreferences.save(sipService, sipService.voip.displayName, "Call Done")
                     sipService.voip.notifyCallStatus("connected")
                 }
                 pjsip_inv_state.PJSIP_INV_STATE_DISCONNECTED -> {

@@ -5,8 +5,9 @@ import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Binder
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
-import android.widget.Toast
+import com.breakreasi.voip_android_2.history.HistoryPreferences
 
 class VoipNotificationService: Service() {
     private val binder: VoipNotificationService.LocalBinder = LocalBinder()
@@ -57,5 +58,13 @@ class VoipNotificationService: Service() {
         } else {
             startForeground(1092, notification)
         }
+        Handler().postDelayed(Runnable {
+            if (!VoipManager.voip!!.callIsOn()) {
+                VoipManager.voip!!.handlerNotificationDecline(isMissed = true)
+                notificationCall.cancel(1092)
+            }
+        }, (30 * 1000).toLong())
     }
+
+
 }

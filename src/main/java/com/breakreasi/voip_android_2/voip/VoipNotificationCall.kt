@@ -4,19 +4,25 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.media.AudioManager
+import android.media.Ringtone
+import android.media.RingtoneManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.graphics.drawable.IconCompat
 import com.breakreasi.voip_android_2.R
 import java.util.Calendar
+import androidx.core.net.toUri
+
 
 class VoipNotificationCall(
     private val context: Context
 ) {
     private val CHANNEL_ID: String = "VOIP_ANDROID_123456"
+    private var ringtone: Ringtone? = null
 
     fun notificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -59,6 +65,20 @@ class VoipNotificationCall(
 
         builder.setFullScreenIntent(null, true)
         builder.setStyle(NotificationCompat.DecoratedCustomViewStyle())
+        val fullScreenIntent = Intent(context, VoipIncomingCallActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra("type", type)
+            putExtra("displayName", displayName)
+            putExtra("withVideo", withVideo)
+            putExtra("token", token)
+        }
+        val fullScreenPendingIntent = PendingIntent.getActivity(
+            context,
+            2,
+            fullScreenIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        builder.setFullScreenIntent(fullScreenPendingIntent, true)
 
         val jawabIntent = Intent(context, VoipNotificationService::class.java)
         jawabIntent.setAction("acceptCall")
@@ -108,8 +128,44 @@ class VoipNotificationCall(
 //            playRingtone()
         }
         val notification = builder.build()
-//        notification.flags =
-//            notification.flags or (Notification.FLAG_INSISTENT or Notification.FLAG_NO_CLEAR or Notification.FLAG_ONGOING_EVENT)
+        notification.flags =
+            notification.flags or (Notification.FLAG_INSISTENT or Notification.FLAG_NO_CLEAR or Notification.FLAG_ONGOING_EVENT)
         return notification
+    }
+
+    fun cancel(id: Int) {
+        stopRingtone()
+        try {
+            val notificationManager = context.getSystemService(NotificationManager::class.java)
+            notificationManager.cancel(id)
+        } catch (_: Exception) {
+        }
+    }
+
+    private fun playRingtone() {
+        stopRingtone()
+        try {
+            val soundUri = (ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
+                    context.packageName + "/" + R.raw.basic_ring).toUri()
+            ringtone = RingtoneManager.getRingtone(context, soundUri)
+            if (ringtone != null && !ringtone!!.isPlaying) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    ringtone!!.isLooping = true
+                }
+                ringtone!!.play()
+            }
+        } catch (_: Exception) {
+        }
+    }
+
+    @Synchronized
+    fun stopRingtone() {
+        if (ringtone != null) {
+            try {
+                if (ringtone!!.isPlaying) ringtone!!.stop()
+            } catch (_: Exception) {
+            }
+            ringtone = null
+        }
     }
 }
