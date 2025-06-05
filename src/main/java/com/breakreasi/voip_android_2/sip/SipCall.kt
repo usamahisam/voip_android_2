@@ -65,7 +65,6 @@ class SipCall(
                 pjsip_inv_state.PJSIP_INV_STATE_CONFIRMED -> {
                     isCall = true
                     sipService.voip.notifyCallStatus("connected")
-                    sipService.sipAudio.setSpeaker(withVideo)
                 }
                 pjsip_inv_state.PJSIP_INV_STATE_DISCONNECTED -> {
                     isCall = false

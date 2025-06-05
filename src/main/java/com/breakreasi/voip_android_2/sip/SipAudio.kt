@@ -41,16 +41,17 @@ class SipAudio(
             val audDevManager: AudDevManager = sipService.sipEngine.endpoint!!.audDevManager()
             if (audioMedia != null) {
                 try {
-                    audioMedia.adjustRxLevel(1.5.toFloat())
-                    audioMedia.adjustTxLevel(1.5.toFloat())
+                    audioMedia.adjustRxLevel(2.0.toFloat())
+                    audioMedia.adjustTxLevel(2.0.toFloat())
                 } catch (_: Exception) {
                 }
                 audioMedia.startTransmit(audDevManager.playbackDevMedia)
                 audDevManager.captureDevMedia.startTransmit(audioMedia)
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.e("SipAudio", "Failed to start audio", e)
         }
-        mic()
+        setSpeaker(true)
     }
 
     fun stop() {
@@ -94,9 +95,9 @@ class SipAudio(
         if (audioMedia == null) return
         try {
             isMute = false
-            audioMedia!!.adjustTxLevel(1.0f)
+            audioMedia!!.adjustTxLevel(2.0f)
             val capture = sipService.sipEngine.endpoint?.audDevManager()?.captureDevMedia
-            capture?.adjustTxLevel(1.0f)
+            capture?.adjustTxLevel(2.0f)
             capture?.startTransmit(audioMedia)
         } catch (e: Exception) {
             Log.e("SipAudio", "Failed to enable mic", e)
@@ -111,8 +112,7 @@ class SipAudio(
             } else {
                 pjmedia_aud_dev_route.PJMEDIA_AUD_DEV_ROUTE_EARPIECE
             }
-        } catch (e: Exception) {
-            Log.e("SipAudio", "Failed to change speaker route", e)
+        } catch (_: Exception) {
         }
     }
 

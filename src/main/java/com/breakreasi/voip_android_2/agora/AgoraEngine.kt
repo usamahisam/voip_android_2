@@ -1,6 +1,10 @@
 package com.breakreasi.voip_android_2.agora
 
 import android.view.SurfaceView
+import com.breakreasi.voip_android_2.rests.ReceiverResponse
+import com.breakreasi.voip_android_2.rests.ResponseCallback
+import com.breakreasi.voip_android_2.rests.ResponseInitConfigModel
+import com.breakreasi.voip_android_2.rests.ResponseModel
 import com.breakreasi.voip_android_2.rests.Rests
 import com.breakreasi.voip_android_2.voip.Voip
 import com.breakreasi.voip_android_2.voip.VoipType
@@ -56,13 +60,15 @@ class AgoraEngine(
         this.channel = channel
         this.userToken = userToken
         this.withVideo = withVideo
-        rests!!.initConfig {
-            if (it != null) {
-                configureRtc(it.agora_app_id)
-            } else {
-                eventListener!!.onAgoraStatus("failed")
+        rests!!.initConfig(object : ResponseCallback<ResponseInitConfigModel?> {
+            override fun onResponse(response: ResponseInitConfigModel?) {
+                if (response != null) {
+                    configureRtc(response.agora_app_id!!)
+                } else {
+                    eventListener!!.onAgoraStatus("failed")
+                }
             }
-        }
+        })
     }
 
     fun configureRtc(agoraId: String) {
@@ -115,16 +121,17 @@ class AgoraEngine(
 
     fun accept() {
         if (rtcEngine == null) return
-        rests!!.acceptCall (
-            userToken,
-            channel
-        ) {
-            if (it != null) {
-                setVideoConfiguration()
-                startPreview()
-                joinChannel()
+        rests!!.acceptCall(userToken, channel, object : ResponseCallback<ResponseModel?> {
+            override fun onResponse(response: ResponseModel?) {
+                if (response != null) {
+                    setVideoConfiguration()
+                    startPreview()
+                    joinChannel()
+                } else {
+                    eventListener!!.onAgoraStatus("failed")
+                }
             }
-        }
+        })
     }
 
     fun hangup() {
@@ -132,12 +139,17 @@ class AgoraEngine(
             rtcEngine!!.stopPreview()
             rtcEngine!!.leaveChannel()
         }
-        rests!!.rejectCall(
-            userToken
-        ) {
-            if (it != null) {
+        rests!!.rejectCall(userToken, object : ResponseCallback<ResponseModel?> {
+            override fun onResponse(response: ResponseModel?) {
+                if (response != null) {
+                    setVideoConfiguration()
+                    startPreview()
+                    joinChannel()
+                } else {
+                    eventListener!!.onAgoraStatus("failed")
+                }
             }
-        }
+        })
     }
 
     fun setMute(isMute: Boolean) {
