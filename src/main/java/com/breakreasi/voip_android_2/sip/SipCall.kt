@@ -1,5 +1,7 @@
 package com.breakreasi.voip_android_2.sip
 
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import com.breakreasi.voip_android_2.history.HistoryPreferences
 import com.breakreasi.voip_android_2.voip.VoipType
@@ -26,6 +28,9 @@ class SipCall(
     private val account: SipAccount,
     callId: Int? = null
 ): Call(account, callId ?: -1) {
+    val callTimeoutMillis = 30_000L
+    val handler = Handler(Looper.getMainLooper())
+    var callTimeoutRunnable: Runnable? = null
     var currentState: Int? = null
     var isCall: Boolean = false
     var withVideo: Boolean = false
@@ -70,6 +75,9 @@ class SipCall(
                 }
                 pjsip_inv_state.PJSIP_INV_STATE_DISCONNECTED -> {
                     isCall = false
+                    if (info.lastStatusCode == pjsip_status_code.PJSIP_SC_REQUEST_TIMEOUT) {
+                        sipService.voip.handlerNotificationDecline(isMissed = true)
+                    }
                     if (currentState != pjsip_inv_state.PJSIP_INV_STATE_CALLING) {
                         disconnected()
                     }
@@ -131,6 +139,22 @@ class SipCall(
         }
     }
 
+    fun startTimeoutCall() {
+        cancelCallTimeout()
+        callTimeoutRunnable = Runnable {
+            sendTimeout()
+            disconnected()
+        }
+        handler.postDelayed(callTimeoutRunnable!!, callTimeoutMillis)
+    }
+
+    fun cancelCallTimeout() {
+        callTimeoutRunnable?.let {
+            handler.removeCallbacks(it)
+            callTimeoutRunnable = null
+        }
+    }
+
     fun makeCall(user: String, withVideo: Boolean) {
         val sipUri = "sip:$user@${account.host}:${account.port}"
         val callOpParam = CallOpParam().apply {
@@ -143,7 +167,9 @@ class SipCall(
         }
         try {
             makeCall(sipUri, callOpParam)
+            startTimeoutCall()
         } catch (_: Exception) {
+            cancelCallTimeout()
         }
     }
 
@@ -166,6 +192,17 @@ class SipCall(
             disconnected()
         } catch (_: Exception) {
         }
+    }
+
+    fun sendTimeout() {
+        try {
+            val callOpParam = CallOpParam().apply {
+                statusCode = pjsip_status_code.PJSIP_SC_REQUEST_TIMEOUT
+            }
+            hangup(callOpParam)
+        } catch (_: Exception) {
+        }
+        disconnected()
     }
 
     fun accept() {
@@ -206,6 +243,7 @@ class SipCall(
 //        sipService.sipAudio.stop()
         sipService.sipVideo.stop()
         sipService.voip.notifyCallStatus("disconnected")
-        sipService.deleteAccount()
+//        sipService.deleteAccount()
+        cancelCallTimeout()
     }
 }

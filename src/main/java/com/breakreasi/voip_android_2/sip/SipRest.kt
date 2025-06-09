@@ -29,7 +29,7 @@ class SipRest(
         var myURL: URL? = null
         try {
             myURL = URL(baseUrl)
-        } catch (ignored: MalformedURLException) {
+        } catch (_: MalformedURLException) {
         }
         if (retrofit == null) {
             if (myURL != null) {

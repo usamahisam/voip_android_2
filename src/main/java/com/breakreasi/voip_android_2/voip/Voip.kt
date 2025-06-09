@@ -17,6 +17,7 @@ class Voip(
     private val voipServiceConnection = VoipServiceConnection(this)
     private val voipNotificationCallbacks = mutableListOf<VoipNotificationCallback>()
     private val voipCallbacks = mutableListOf<VoipCallback>()
+    private val voipVoicemailCallback = mutableListOf<VoipVoicemailCallback>()
     var type: VoipType = VoipType.SIP
     var displayName: String = ""
     var username: String = ""
@@ -89,6 +90,23 @@ class Voip(
         }
         try {
             voipCallbacks.forEach { it.onCallStatus(this, status) }
+        } catch (_: Exception) {
+        }
+    }
+
+    fun registerVoicemailCallback(callback: VoipVoicemailCallback) {
+        voipVoicemailCallback.add(callback)
+    }
+
+    fun unregisterVoicemailCallback(callback: VoipVoicemailCallback) {
+        voipVoicemailCallback.remove(callback)
+    }
+
+    fun notifyVoicemailRecord(status: String) {
+        try {
+            voipVoicemailCallback.forEach {
+                it.onRecordStatus(status)
+            }
         } catch (_: Exception) {
         }
     }
@@ -167,6 +185,24 @@ class Voip(
         } else if (type == VoipType.AGORA) {
             voipServiceConnection.agoraService?.videoSurfaceLocal(localSurface)
             voipServiceConnection.agoraService?.videoSurfaceRemote(remoteSurface)
+        }
+    }
+
+    fun startVoicemail() {
+        if (type == VoipType.SIP) {
+            voipServiceConnection.sipService?.startRecVoicemail()
+        }
+    }
+
+    fun stopVoicemail() {
+        if (type == VoipType.SIP) {
+            voipServiceConnection.sipService?.stopRecVoicemail()
+        }
+    }
+
+    fun sendVoicemail() {
+        if (type == VoipType.SIP) {
+            voipServiceConnection.sipService?.sendVoicemail()
         }
     }
 

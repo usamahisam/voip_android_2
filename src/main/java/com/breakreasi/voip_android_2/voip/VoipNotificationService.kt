@@ -7,6 +7,7 @@ import android.os.Binder
 import android.os.Build
 import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import com.breakreasi.voip_android_2.history.HistoryPreferences
 
 class VoipNotificationService: Service() {
@@ -58,12 +59,6 @@ class VoipNotificationService: Service() {
         } else {
             startForeground(1092, notification)
         }
-        Handler().postDelayed(Runnable {
-            if (!VoipManager.voip!!.callIsOn()) {
-                VoipManager.voip!!.handlerNotificationDecline(isMissed = true)
-                notificationCall.cancel(1092)
-            }
-        }, (30 * 1000).toLong())
     }
 
 

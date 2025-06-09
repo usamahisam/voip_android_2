@@ -12,7 +12,7 @@ class SipEndpoint: Endpoint() {
 
     override fun onIpChangeProgress(prm: OnIpChangeProgressParam?) {
         super.onIpChangeProgress(prm)
-        if (prm?.getStatus() != pj_constants_.PJ_SUCCESS) {
+        if (prm?.status != pj_constants_.PJ_SUCCESS) {
             hangupAllCalls()
             return
         }

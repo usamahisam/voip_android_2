@@ -1,20 +1,26 @@
 package com.breakreasi.voip_android_2.sip
 
 import android.os.Build
+import android.util.Base64
 import android.util.Log
 import androidx.annotation.RequiresApi
-import com.breakreasi.voip_android_2.voip.VoipType
 import org.pjsip.pjsua2.Account
 import org.pjsip.pjsua2.AccountConfig
 import org.pjsip.pjsua2.AuthCredInfo
 import org.pjsip.pjsua2.AuthCredInfoVector
+import org.pjsip.pjsua2.Buddy
+import org.pjsip.pjsua2.BuddyConfig
 import org.pjsip.pjsua2.OnIncomingCallParam
+import org.pjsip.pjsua2.OnInstantMessageParam
 import org.pjsip.pjsua2.OnRegStartedParam
 import org.pjsip.pjsua2.OnRegStateParam
+import org.pjsip.pjsua2.SendInstantMessageParam
 import org.pjsip.pjsua2.pj_constants_
 import org.pjsip.pjsua2.pjmedia_srtp_use
-import org.pjsip.pjsua2.pjmedia_type
 import org.pjsip.pjsua2.pjsip_status_code
+import java.io.File
+import java.nio.file.Files
+
 
 class SipAccount(
     private var sipService: SipService
@@ -46,6 +52,11 @@ class SipAccount(
             call?.delete()
         }
         call = SipCall(sipService, this, prm?.callId)
+        Log.i("fgahsdfahsfdhgafshdfg", "onIncomingCall")
+    }
+
+    override fun onInstantMessage(prm: OnInstantMessageParam?) {
+        Log.i("fgahsdfahsfdhgafshdfg", "onInstantMessage")
     }
 
     fun auth(host: String, port: Int, displayName: String, username: String, password: String, destination: String, withVideo: Boolean) {
@@ -101,6 +112,7 @@ class SipAccount(
             mediaConfig.streamKaEnabled = true
             callConfig.timerSessExpiresSec = 300
             callConfig.timerMinSESec = 90
+            callConfig.timerUse = pj_constants_.PJ_TRUE
         }
         return try {
             create(accCfg)
@@ -120,7 +132,7 @@ class SipAccount(
             if (this.destination.isNotEmpty()) {
                 newCall().makeCall(destination, withVideo)
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             sipService.voip.notifyAccountStatus("blocked")
         }
     }
@@ -136,5 +148,29 @@ class SipAccount(
     fun checkIsCall(): Boolean {
         if (call == null) return false
         return call!!.isCall
+    }
+
+    fun sendVoicemail(destination: String, outputFile: File) {
+        try {
+            val bytes = outputFile.readBytes()
+            val base64 = Base64.encodeToString(bytes, Base64.NO_WRAP)
+
+            val buddy = Buddy()
+            val bCfg = BuddyConfig().apply {
+                uri = "sip:$destination@${host}:${port}"
+                subscribe = false
+            }
+
+            buddy.create(this, bCfg)
+
+            val prm = SendInstantMessageParam().apply {
+                contentType = "text/plain"
+                content = "Voicemail (base64, truncated):\n${base64.take(500)}..."
+            }
+
+            buddy.sendInstantMessage(prm)
+            buddy.delete()
+        } catch (_: Exception) {
+        }
     }
 }

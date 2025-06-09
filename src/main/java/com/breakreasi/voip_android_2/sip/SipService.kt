@@ -3,7 +3,9 @@ package com.breakreasi.voip_android_2.sip
 import android.app.Service
 import android.content.Intent
 import android.os.Binder
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.util.Log
 import android.view.SurfaceView
 import com.breakreasi.voip_android_2.voip.Voip
@@ -20,6 +22,7 @@ class SipService : Service() {
     lateinit var sipAudio: SipAudio
     lateinit var sipCamera: SipCamera
     lateinit var sipVideo: SipVideo
+    lateinit var sipVoicemail: SipVoicemail
     lateinit var voip: Voip
 
     override fun onBind(intent: Intent?): IBinder = binder
@@ -37,6 +40,7 @@ class SipService : Service() {
         sipCamera = SipCamera(this)
         sipVideo = SipVideo(this)
         sipEngine.configures()
+        sipVoicemail = SipVoicemail(this)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -107,10 +111,26 @@ class SipService : Service() {
         sipVideo.toggleSurfaceRemoteFit()
     }
 
+    fun startRecVoicemail() {
+        sipVoicemail.startRecord(sipAccount!!.destination)
+    }
+
+    fun stopRecVoicemail() {
+        sipVoicemail.stopRecord()
+    }
+
+    fun sendVoicemail() {
+        sipVoicemail.send()
+    }
+
+    @Synchronized
     fun deleteAccount() {
-        if (sipAccount != null) {
-            sipAccount!!.delete()
-            sipAccount = null
+        try {
+            sipAccount?.let {
+                it.delete()
+                sipAccount = null
+            }
+        } catch (_: Exception) {
         }
     }
 
