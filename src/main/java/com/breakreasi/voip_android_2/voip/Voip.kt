@@ -30,7 +30,7 @@ class Voip(
     private val tone: Tone = Tone()
     private var ringtone: Ringtone? = null
 
-    fun auth(displayName: String, username: String, password: String, destination: String, withVideo: Boolean, withNotification: Boolean) {
+    fun engineStart(displayName: String, username: String, password: String, destination: String, withVideo: Boolean, withNotification: Boolean) {
         this.type = VoipType.SIP
         this.displayName = displayName
         this.username = username
@@ -38,20 +38,16 @@ class Voip(
         this.destination = destination
         this.withVideo = withVideo
         this.withNotification = withNotification
-        engineStart()
+        voipServiceConnection.start()
     }
 
-    fun auth(displayName: String, channel: String, userToken: String, withVideo: Boolean, withNotification: Boolean) {
+    fun engineStart(displayName: String, channel: String, userToken: String, withVideo: Boolean, withNotification: Boolean) {
         this.type = VoipType.AGORA
         this.displayName = displayName
         this.channel = channel
         this.userToken = userToken
         this.withVideo = withVideo
         this.withNotification = withNotification
-        engineStart()
-    }
-
-    private fun engineStart() {
         voipServiceConnection.start()
     }
 
