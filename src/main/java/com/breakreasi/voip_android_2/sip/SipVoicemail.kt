@@ -54,15 +54,29 @@ class SipVoicemail(
             release()
         }
         recorder = null
-        sipService.voip.notifyVoicemailRecord("done")
+        sipService.voip.notifyVoicemailRecord("stop")
         send()
     }
 
     fun send() {
-        if (destination.isEmpty()) return
-        if (outputFile == null) return
-        sipService.voip.notifyVoicemailRecord("send ok")
-        sipService.sipAccount!!.sendVoicemail(destination, outputFile!!)
+        if (destination.isEmpty()) {
+            sipService.voip.notifyVoicemailRecord("send_failed")
+            return
+        }
+        if (outputFile == null) {
+            sipService.voip.notifyVoicemailRecord("send_failed")
+            return
+        }
+        sipService.sipRest.sendVoicemail(outputFile!!, destination, object : SipRestResponseCallback<SipRestResponse> {
+            override fun onResponse(response: SipRestResponse?) {
+                if (response != null && response.status == "success") {
+                    sipService.voip.notifyVoicemailRecord("send_ok")
+                    sipService.sipAccount!!.sendInstantMsg(destination, response.msg!!)
+                } else {
+                    sipService.voip.notifyVoicemailRecord("send_failed")
+                }
+            }
+        })
     }
 
     fun startTimer() {

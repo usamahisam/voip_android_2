@@ -48,15 +48,13 @@ class SipAccount(
 
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onIncomingCall(prm: OnIncomingCallParam?) {
-        if (call != null) {
-            call?.delete()
+        if (call != null && call!!.isActive) {
+            call!!.delete()
         }
         call = SipCall(sipService, this, prm?.callId)
-        Log.i("fgahsdfahsfdhgafshdfg", "onIncomingCall")
     }
 
     override fun onInstantMessage(prm: OnInstantMessageParam?) {
-        Log.i("fgahsdfahsfdhgafshdfg", "onInstantMessage")
     }
 
     fun auth(host: String, port: Int, displayName: String, username: String, password: String, destination: String, withVideo: Boolean) {
@@ -138,8 +136,8 @@ class SipAccount(
     }
 
     fun newCall(): SipCall {
-        if (call != null) {
-            call?.delete()
+        if (call != null && call!!.isActive) {
+            call!!.delete()
         }
         call = SipCall(sipService, this)
         return call as SipCall
@@ -150,24 +148,18 @@ class SipAccount(
         return call!!.isCall
     }
 
-    fun sendVoicemail(destination: String, outputFile: File) {
+    fun sendInstantMsg(destination: String, msg: String) {
         try {
-            val bytes = outputFile.readBytes()
-            val base64 = Base64.encodeToString(bytes, Base64.NO_WRAP)
-
             val buddy = Buddy()
             val bCfg = BuddyConfig().apply {
                 uri = "sip:$destination@${host}:${port}"
                 subscribe = false
             }
-
             buddy.create(this, bCfg)
-
             val prm = SendInstantMessageParam().apply {
                 contentType = "text/plain"
-                content = "Voicemail (base64, truncated):\n${base64.take(500)}..."
+                content = msg
             }
-
             buddy.sendInstantMessage(prm)
             buddy.delete()
         } catch (_: Exception) {
