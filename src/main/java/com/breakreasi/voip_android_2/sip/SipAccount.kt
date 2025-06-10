@@ -140,7 +140,7 @@ class SipAccount(
             call!!.delete()
         }
         call = SipCall(sipService, this)
-        return call as SipCall
+        return call!!
     }
 
     fun checkIsCall(): Boolean {
