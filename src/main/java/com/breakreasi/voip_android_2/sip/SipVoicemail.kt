@@ -26,7 +26,7 @@ class SipVoicemail(
 
     fun startRecord(destination: String) {
         this.destination = destination
-        this.outputFile = File(sipService.filesDir, "voicemail-${destination}.3gp")
+        this.outputFile = File(sipService.filesDir, "voicemail-${destination}.record")
         if (outputFile!!.exists()) {
             outputFile!!.delete()
         }
@@ -38,6 +38,11 @@ class SipVoicemail(
             setAudioSource(MediaRecorder.AudioSource.MIC)
             setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
             setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
+            try {
+                setAudioEncodingBitRate(4750)
+                setAudioSamplingRate(8000)
+            } catch (_: Exception) {
+            }
             setOutputFile(outputFile!!.absolutePath)
             prepare()
         }
