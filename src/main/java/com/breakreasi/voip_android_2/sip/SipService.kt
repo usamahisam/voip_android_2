@@ -130,7 +130,6 @@ class SipService : Service() {
                 it?.delete()
                 sipAccount!!.call = null
             }
-            sipAccount!!.destination = ""
         } catch (_: Exception) {
         }
     }
