@@ -17,10 +17,10 @@ class SipAccount(
     var password: String? = null
     var call: SipCall? = null
     var destination: String = ""
+    var isIncoming: Boolean = false
     var withVideo: Boolean = false
 
     override fun onRegStarted(prm: OnRegStartedParam?) {
-        // Optional: Log or track registration starting
     }
 
     override fun onRegState(prm: OnRegStateParam?) {
@@ -82,10 +82,11 @@ class SipAccount(
         this.password = password
         this.destination = destination
         this.withVideo = withVideo
+        this.isIncoming = this.destination.isNotEmpty()
 
         if (checkIsCreated()) {
             sipService.voip.notifyAccountStatus("success")
-            if (this.destination.isNotEmpty()) {
+            if (isIncoming) {
                 newCall().makeCall(this.destination, withVideo)
             }
             return
@@ -158,7 +159,7 @@ class SipAccount(
     private fun handleAccountSuccess() {
         try {
             sipService.voip.notifyAccountStatus("success")
-            if (this.destination.isNotEmpty()) {
+            if (this.isIncoming) {
                 newCall().makeCall(destination, withVideo)
             }
         } catch (e: Exception) {

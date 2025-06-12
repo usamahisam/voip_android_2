@@ -168,6 +168,7 @@ class SipCall(
         try {
             makeCall(sipUri, callOpParam)
             startTimeoutCall()
+            account.isIncoming = false
         } catch (e: Exception) {
             Log.e("SipCall", "makeCall failed", e)
             cancelCallTimeout()
