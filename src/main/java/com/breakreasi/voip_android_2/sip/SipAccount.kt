@@ -34,8 +34,8 @@ class SipAccount(
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onIncomingCall(prm: OnIncomingCallParam?) {
         try {
-            if (call != null && call!!.isActive) {
-                call!!.delete()
+            if (call != null) {
+                sipService.deleteCall()
             }
             call = SipCall(sipService, this, prm?.callId)
         } catch (e: Exception) {
@@ -168,7 +168,7 @@ class SipAccount(
     }
 
     fun newCall(): SipCall {
-        if (call != null && call!!.isActive) {
+        if (call != null) {
             call!!.delete()
         }
         call = SipCall(sipService, this)

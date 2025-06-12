@@ -124,6 +124,17 @@ class SipService : Service() {
     }
 
     @Synchronized
+    fun deleteCall() {
+        try {
+            sipAccount!!.call.let {
+                it?.delete()
+                sipAccount!!.call = null
+            }
+        } catch (_: Exception) {
+        }
+    }
+
+    @Synchronized
     fun deleteAccount() {
         try {
             sipAccount?.let {

@@ -112,6 +112,15 @@ class Voip(
         }
     }
 
+    fun notifyVoicemailTimer(seconds: Long) {
+        try {
+            voipVoicemailCallback.forEach {
+                it.onVoicemailRecordTimer(seconds)
+            }
+        } catch (_: Exception) {
+        }
+    }
+
     fun callIsOn(): Boolean {
         try {
             if (voipServiceConnection.sipService != null) {

@@ -3,9 +3,9 @@ package com.breakreasi.voip_android_2.sip
 import android.Manifest
 import android.content.pm.PackageManager
 import android.media.MediaRecorder
+import android.os.CountDownTimer
 import android.os.Handler
 import android.os.Looper
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import java.io.File
 
@@ -17,9 +17,9 @@ class SipVoicemail(
     private var destination: String = ""
     private var recorder: MediaRecorder? = null
     private var outputFile: File ?= null
-    val callTimeoutMillis = 5_000L
+    val callTimeoutMillis = 30_000L
     val handler = Handler(Looper.getMainLooper())
-    var callTimeoutRunnable: Runnable? = null
+    var countDownTimer: CountDownTimer? = null
 
     fun checkAudioPermission(): Boolean {
         return ContextCompat.checkSelfPermission(sipService, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
@@ -88,17 +88,21 @@ class SipVoicemail(
 
     fun startTimer() {
         cancelTimer()
-        callTimeoutRunnable = Runnable {
-            stopRecord()
-        }
-        handler.postDelayed(callTimeoutRunnable!!, callTimeoutMillis)
+        countDownTimer = object : CountDownTimer(callTimeoutMillis, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                val secondsLeft = millisUntilFinished / 1000
+                sipService.voip.notifyVoicemailTimer(secondsLeft)
+            }
+            override fun onFinish() {
+                sipService.voip.notifyVoicemailRecord("timeout")
+                stopRecord()
+            }
+        }.start()
     }
 
     fun cancelTimer() {
-        callTimeoutRunnable?.let {
-            handler.removeCallbacks(it)
-            callTimeoutRunnable = null
-        }
+        countDownTimer?.cancel()
+        countDownTimer = null
     }
 
     fun getList(): MutableList<SipVoicemailModel>? {

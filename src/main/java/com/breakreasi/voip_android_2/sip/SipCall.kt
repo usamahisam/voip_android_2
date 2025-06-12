@@ -5,23 +5,7 @@ import android.os.Looper
 import android.util.Log
 import com.breakreasi.voip_android_2.history.HistoryPreferences
 import com.breakreasi.voip_android_2.voip.VoipType
-import org.pjsip.pjsua2.Call
-import org.pjsip.pjsua2.CallOpParam
-import org.pjsip.pjsua2.CallVidSetStreamParam
-import org.pjsip.pjsua2.OnCallMediaEventParam
-import org.pjsip.pjsua2.OnCallMediaStateParam
-import org.pjsip.pjsua2.OnCallStateParam
-import org.pjsip.pjsua2.pjmedia_dir
-import org.pjsip.pjsua2.pjmedia_event_type
-import org.pjsip.pjsua2.pjmedia_rtcp_fb_type
-import org.pjsip.pjsua2.pjmedia_type
-import org.pjsip.pjsua2.pjsip_inv_state
-import org.pjsip.pjsua2.pjsip_status_code
-import org.pjsip.pjsua2.pjsua2
-import org.pjsip.pjsua2.pjsua_call_flag
-import org.pjsip.pjsua2.pjsua_call_media_status
-import org.pjsip.pjsua2.pjsua_call_vid_strm_op
-import org.pjsip.pjsua2.pjsua_vid_req_keyframe_method
+import org.pjsip.pjsua2.*
 
 class SipCall(
     private var sipService: SipService,
@@ -41,21 +25,23 @@ class SipCall(
 
     override fun onCallState(prm: OnCallStateParam?) {
         try {
-            if (currentState == pjsip_inv_state.PJSIP_INV_STATE_CALLING
-                && info.lastStatusCode == 404) {
+            val callInfo = try { info } catch (e: Exception) {
+                Log.e("SipCall", "Failed to get call info", e)
+                return
+            }
+
+            if (currentState == pjsip_inv_state.PJSIP_INV_STATE_CALLING &&
+                callInfo.lastStatusCode == 404) {
                 isCall = false
                 disconnected()
                 return
             }
-            when (info.state) {
+
+            when (callInfo.state) {
                 pjsip_inv_state.PJSIP_INV_STATE_INCOMING -> {
                     isCall = false
-                    if (info.media.isEmpty()) {
-                        sendBusy()
-                        return
-                    }
                     sendRinging()
-                    withVideo = info.remVideoCount > 0
+                    withVideo = callInfo.remVideoCount > 0
                     sipService.voip.withVideo = withVideo
                     sipService.voip.notificationCallService(VoipType.SIP, sipService.sipAccount!!.displayName!!, withVideo, "")
                     sipService.voip.notifyCallStatus("incoming")
@@ -79,7 +65,7 @@ class SipCall(
                 }
                 pjsip_inv_state.PJSIP_INV_STATE_DISCONNECTED -> {
                     isCall = false
-                    if (info.lastStatusCode == pjsip_status_code.PJSIP_SC_REQUEST_TIMEOUT) {
+                    if (callInfo.lastStatusCode == pjsip_status_code.PJSIP_SC_REQUEST_TIMEOUT) {
                         sipService.voip.handlerNotificationDecline(isMissed = true)
                     }
                     if (currentState != pjsip_inv_state.PJSIP_INV_STATE_CALLING) {
@@ -88,18 +74,23 @@ class SipCall(
                 }
                 pjsip_inv_state.PJSIP_INV_STATE_NULL -> {}
             }
-            currentState = info.state
-        } catch (_: Exception) {
+            currentState = callInfo.state
+        } catch (e: Exception) {
+            Log.e("SipCall", "onCallState failed", e)
         }
     }
 
     override fun onCallMediaState(prm: OnCallMediaStateParam?) {
         try {
-            val info = info
+            val callInfo = try { info } catch (e: Exception) {
+                Log.e("SipCall", "Failed to get call info in onCallMediaState", e)
+                return
+            }
+
             withVideo = false
-            for (i in 0 until info.media.size) {
+            for (i in 0 until callInfo.media.size) {
                 val media = getMedia(i.toLong())
-                val mediaInfo = info.media[i]
+                val mediaInfo = callInfo.media[i]
                 if (mediaInfo.type == pjmedia_type.PJMEDIA_TYPE_AUDIO &&
                     media != null &&
                     mediaInfo.status == pjsua_call_media_status.PJSUA_CALL_MEDIA_ACTIVE) {
@@ -111,7 +102,8 @@ class SipCall(
                     withVideo = true
                 }
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.e("SipCall", "onCallMediaState failed", e)
         }
     }
 
@@ -119,7 +111,11 @@ class SipCall(
         when (prm.ev.type) {
             pjmedia_event_type.PJMEDIA_EVENT_FMT_CHANGED -> {
                 try {
-                    val callInfo = info
+                    val callInfo = try { info } catch (e: Exception) {
+                        Log.e("SipCall", "Failed to get call info in onCallMediaEvent", e)
+                        return
+                    }
+
                     val mediaInfo = callInfo.media[prm.medIdx.toInt()]
                     if (mediaInfo.type == pjmedia_type.PJMEDIA_TYPE_VIDEO &&
                         mediaInfo.dir == pjmedia_dir.PJMEDIA_DIR_DECODING) {
@@ -128,7 +124,8 @@ class SipCall(
                         val h = fmtEvent.newHeight.toInt()
                         sipService.sipVideo.changeFmt(w, h)
                     }
-                } catch (_: Exception) {
+                } catch (e: Exception) {
+                    Log.e("SipCall", "FMT_CHANGED event handling failed", e)
                 }
             }
             pjmedia_event_type.PJMEDIA_EVENT_RX_RTCP_FB -> {
@@ -147,7 +144,6 @@ class SipCall(
         cancelCallTimeout()
         callTimeoutRunnable = Runnable {
             sendTimeout()
-            disconnected()
         }
         handler.postDelayed(callTimeoutRunnable!!, callTimeoutMillis)
     }
@@ -172,7 +168,8 @@ class SipCall(
         try {
             makeCall(sipUri, callOpParam)
             startTimeoutCall()
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.e("SipCall", "makeCall failed", e)
             cancelCallTimeout()
         }
     }
@@ -183,7 +180,8 @@ class SipCall(
                 statusCode = pjsip_status_code.PJSIP_SC_RINGING
             }
             answer(callOpParam)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.e("SipCall", "sendRinging failed", e)
         }
     }
 
@@ -194,7 +192,8 @@ class SipCall(
             }
             answer(callOpParam)
             disconnected()
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.e("SipCall", "sendBusy failed", e)
         }
     }
 
@@ -204,31 +203,39 @@ class SipCall(
                 statusCode = pjsip_status_code.PJSIP_SC_REQUEST_TIMEOUT
             }
             hangup(callOpParam)
+        } catch (e: Exception) {
+            Log.e("SipCall", "sendTimeout failed", e)
+        }
+        try {
+            disconnected()
         } catch (_: Exception) {
         }
-        disconnected()
     }
 
     fun accept() {
-        val callOpParam = CallOpParam()
-        callOpParam.statusCode = pjsip_status_code.PJSIP_SC_OK
-        callOpParam.opt.audioCount = 1
-        if (withVideo) {
-            callOpParam.opt.videoCount = 1
+        val callOpParam = CallOpParam().apply {
+            statusCode = pjsip_status_code.PJSIP_SC_OK
+            opt.audioCount = 1
+            if (withVideo) {
+                opt.videoCount = 1
+            }
+            opt.reqKeyframeMethod = pjsua_vid_req_keyframe_method.PJSUA_VID_REQ_KEYFRAME_RTCP_PLI.toLong()
         }
-        callOpParam.opt.reqKeyframeMethod = pjsua_vid_req_keyframe_method.PJSUA_VID_REQ_KEYFRAME_RTCP_PLI.toLong()
         try {
             answer(callOpParam)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.e("SipCall", "accept failed", e)
         }
     }
 
     fun decline() {
-        val callOpParam = CallOpParam()
-        callOpParam.statusCode = pjsip_status_code.PJSIP_SC_DECLINE
+        val callOpParam = CallOpParam().apply {
+            statusCode = pjsip_status_code.PJSIP_SC_DECLINE
+        }
         try {
             hangup(callOpParam)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.e("SipCall", "decline failed", e)
         }
     }
 
@@ -238,18 +245,26 @@ class SipCall(
                 pjsua_call_vid_strm_op.PJSUA_CALL_VID_STRM_SEND_KEYFRAME,
                 CallVidSetStreamParam()
             )
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.e("SipCall", "sendKeyFrame failed", e)
         }
     }
 
     private fun disconnected() {
-        sipService.voip.stopNotificationCallService()
-//        sipService.sipAudio.stop()
-        sipService.sipVideo.stop()
-        sipService.voip.notifyCallStatus("disconnected")
-//        if (sipService.sipAccount!!.destination.isEmpty()) {
-//            sipService.deleteAccount()
-//        }
-        cancelCallTimeout()
+        try {
+            sipService.voip.stopNotificationCallService()
+            sipService.sipVideo.stop()
+            sipService.voip.notifyCallStatus("disconnected")
+            cancelCallTimeout()
+            destroyCall()
+        } catch (_: Exception) {
+        }
+    }
+
+    fun destroyCall() {
+        try {
+            sipService.deleteCall()
+        } catch (e: Exception) {
+        }
     }
 }
