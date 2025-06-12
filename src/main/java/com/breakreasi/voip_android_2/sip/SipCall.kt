@@ -200,6 +200,10 @@ class SipCall(
 
     fun sendTimeout() {
         try {
+            if (currentState == pjsip_inv_state.PJSIP_INV_STATE_DISCONNECTED ||
+                currentState == pjsip_inv_state.PJSIP_INV_STATE_NULL) {
+                return
+            }
             val callOpParam = CallOpParam().apply {
                 statusCode = pjsip_status_code.PJSIP_SC_REQUEST_TIMEOUT
             }
