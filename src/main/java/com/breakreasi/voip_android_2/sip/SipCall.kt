@@ -243,7 +243,9 @@ class SipCall(
 //        sipService.sipAudio.stop()
         sipService.sipVideo.stop()
         sipService.voip.notifyCallStatus("disconnected")
-//        sipService.deleteAccount()
+//        if (sipService.sipAccount!!.destination.isEmpty()) {
+//            sipService.deleteAccount()
+//        }
         cancelCallTimeout()
     }
 }
