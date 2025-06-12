@@ -22,11 +22,12 @@ class VoipNotificationCall(
     private val context: Context
 ) {
     private val CHANNEL_ID: String = "VOIP_ANDROID_123456"
+    private val CHANNEL_ID_2: String = "VOIP_ANDROID_983479875"
 
-    fun notificationChannel() {
+    fun notificationChannel(channelId: String) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
-                CHANNEL_ID,
+                channelId,
                 "Call Notifications",
                 NotificationManager.IMPORTANCE_HIGH
             )
@@ -44,7 +45,7 @@ class VoipNotificationCall(
         token: String
     ): Notification {
         val am = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager?
-        notificationChannel()
+        notificationChannel(CHANNEL_ID)
         val builder: NotificationCompat.Builder = NotificationCompat.Builder(
             context,
             CHANNEL_ID
@@ -129,6 +130,34 @@ class VoipNotificationCall(
         val notification = builder.build()
         notification.flags =
             notification.flags or (Notification.FLAG_INSISTENT or Notification.FLAG_NO_CLEAR or Notification.FLAG_ONGOING_EVENT)
+        return notification
+    }
+
+    fun buildNotifyVoicemail(
+        from: String,
+        url: String,
+    ): Notification {
+        notificationChannel(CHANNEL_ID_2)
+        val builder: NotificationCompat.Builder = NotificationCompat.Builder(
+            context,
+            CHANNEL_ID_2
+        )
+        builder.setContentTitle("Voicemail dari $from")
+        builder.setContentText("Anda menerima voicemail dari $from")
+        builder.setSmallIcon(R.drawable.btn_startcall_pressed)
+        builder.setOngoing(false)
+        builder.setAutoCancel(true)
+
+        builder.setTicker("CALL_VOICEMAIL")
+        builder.setDefaults(Notification.DEFAULT_ALL)
+        builder.setWhen(Calendar.getInstance().getTimeInMillis())
+        builder.setTimeoutAfter(10000)
+        builder.setCategory(NotificationCompat.CATEGORY_MESSAGE)
+        builder.setPriority(NotificationCompat.PRIORITY_HIGH)
+        builder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+
+        val notification = builder.build()
+//        notification.flags = notification.flags or (Notification.FLAG_INSISTENT or Notification.FLAG_NO_CLEAR)
         return notification
     }
 

@@ -9,6 +9,7 @@ import android.view.SurfaceView
 import androidx.core.net.toUri
 import com.breakreasi.voip_android_2.R
 import com.breakreasi.voip_android_2.history.HistoryPreferences
+import com.breakreasi.voip_android_2.sip.SipVoicemailModel
 import com.breakreasi.voip_android_2.tone.Tone
 
 class Voip(
@@ -105,7 +106,7 @@ class Voip(
     fun notifyVoicemailRecord(status: String) {
         try {
             voipVoicemailCallback.forEach {
-                it.onRecordStatus(status)
+                it.onVoicemailRecordStatus(status)
             }
         } catch (_: Exception) {
         }
@@ -188,9 +189,9 @@ class Voip(
         }
     }
 
-    fun startVoicemail() {
+    fun startVoicemail(from: String) {
         if (type == VoipType.SIP) {
-            voipServiceConnection.sipService?.startRecVoicemail()
+            voipServiceConnection.sipService?.startRecVoicemail(from)
         }
     }
 
@@ -204,6 +205,10 @@ class Voip(
         if (type == VoipType.SIP) {
             voipServiceConnection.sipService?.sendVoicemail()
         }
+    }
+
+    fun getVoicemailList(): MutableList<SipVoicemailModel>? {
+        return voipServiceConnection.sipService?.sipVoicemail!!.getList()
     }
 
     fun notificationCallService(type: VoipType, displayName: String, withVideo: Boolean, token: String) {
@@ -265,6 +270,11 @@ class Voip(
             }
             ringtone = null
         }
+    }
+
+    fun notificationVoicemailService(from: String, url: String) {
+        VoipManager.voip = this
+        voipServiceConnection.startServiceVoicemailNotification(from, url)
     }
 
     fun destroy() {

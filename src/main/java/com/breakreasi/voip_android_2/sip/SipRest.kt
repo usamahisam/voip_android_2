@@ -75,7 +75,7 @@ class SipRest(
         })
     }
 
-    fun sendVoicemail(file: File, destination: String, callback: SipRestResponseCallback<SipRestResponse>) {
+    fun sendVoicemail(file: File, destination: String, from: String, callback: SipRestResponseCallback<SipRestResponse>) {
         if (!file.exists()) {
             callback.onResponse(null)
             return
@@ -84,7 +84,8 @@ class SipRest(
         val requestFile: RequestBody = RequestBody.create(MediaType.parse("audio/amr"), file)
         val voicemailPart = MultipartBody.Part.createFormData("voicemail", file.getName(), requestFile)
         val requestDestination: RequestBody = RequestBody.create(MediaType.parse("text/plain"), destination)
-        repo?.sendVoicemail(requestToken, voicemailPart, requestDestination)?.enqueue(object : Callback<SipRestResponse?> {
+        val requestFrom: RequestBody = RequestBody.create(MediaType.parse("text/plain"), from)
+        repo?.sendVoicemail(requestToken, voicemailPart, requestDestination, requestFrom)?.enqueue(object : Callback<SipRestResponse?> {
             override fun onResponse(
                 call: Call<SipRestResponse?>,
                 response: Response<SipRestResponse?>

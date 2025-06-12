@@ -24,6 +24,7 @@ interface SipRestRepo {
     fun sendVoicemail(
         @Part("token") token: RequestBody,
         @Part voicemailFile: MultipartBody.Part?,
-        @Part("destination") destination: RequestBody
+        @Part("destination") destination: RequestBody,
+        @Part("from") from: RequestBody
     ): Call<SipRestResponse?>?
 }

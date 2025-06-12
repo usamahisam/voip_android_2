@@ -13,6 +13,7 @@ import java.io.File
 class SipVoicemail(
     private val sipService: SipService
 ) {
+    private var from: String = ""
     private var destination: String = ""
     private var recorder: MediaRecorder? = null
     private var outputFile: File ?= null
@@ -24,7 +25,8 @@ class SipVoicemail(
         return ContextCompat.checkSelfPermission(sipService, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
     }
 
-    fun startRecord(destination: String) {
+    fun startRecord(from: String, destination: String) {
+        this.from = from
         this.destination = destination
         this.outputFile = File(sipService.filesDir, "voicemail-${destination}.record")
         if (outputFile!!.exists()) {
@@ -72,7 +74,7 @@ class SipVoicemail(
             sipService.voip.notifyVoicemailRecord("send_failed")
             return
         }
-        sipService.sipRest.sendVoicemail(outputFile!!, destination, object : SipRestResponseCallback<SipRestResponse> {
+        sipService.sipRest.sendVoicemail(outputFile!!, destination, from, object : SipRestResponseCallback<SipRestResponse> {
             override fun onResponse(response: SipRestResponse?) {
                 if (response != null && response.status == "success") {
                     sipService.voip.notifyVoicemailRecord("send_ok")
@@ -97,5 +99,9 @@ class SipVoicemail(
             handler.removeCallbacks(it)
             callTimeoutRunnable = null
         }
+    }
+
+    fun getList(): MutableList<SipVoicemailModel>? {
+        return SipVoicemailPreferences.getList(sipService)
     }
 }

@@ -47,6 +47,10 @@ class VoipNotificationService: Service() {
                 VoipManager.voip!!.handlerNotificationDecline()
             }
             stopSelf()
+        } else if (action == "receiveVoicemail") {
+            val from = intent?.getStringExtra("from")
+            val url = intent?.getStringExtra("url")
+            voicemail(from!!, url!!)
         }
         return START_STICKY
     }
@@ -58,6 +62,16 @@ class VoipNotificationService: Service() {
             startForeground(1092, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL)
         } else {
             startForeground(1092, notification)
+        }
+    }
+
+    fun voicemail(from: String, url: String) {
+        val notificationCall = VoipNotificationCall(this)
+        val notification = notificationCall.buildNotifyVoicemail(from, url)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(1099, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL)
+        } else {
+            startForeground(1099, notification)
         }
     }
 

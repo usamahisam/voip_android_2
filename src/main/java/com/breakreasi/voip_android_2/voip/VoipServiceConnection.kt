@@ -84,6 +84,19 @@ class VoipServiceConnection(
         }
     }
 
+    fun startServiceVoicemailNotification(from: String, url: String) {
+        val i = Intent(voip.context, VoipNotificationService::class.java)
+        i.setAction("receiveVoicemail")
+        i.putExtra("from", from)
+        i.putExtra("url", url)
+        voip.context.bindService(i, this, Context.BIND_ABOVE_CLIENT)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            voip.context.startForegroundService(i)
+        } else {
+            voip.context.startService(i)
+        }
+    }
+
     fun stopServiceNotification() {
         try {
             stopService(VoipNotificationService::class.java)
