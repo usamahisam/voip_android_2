@@ -50,6 +50,10 @@ class SipCall(
             when (info.state) {
                 pjsip_inv_state.PJSIP_INV_STATE_INCOMING -> {
                     isCall = false
+                    if (info.media.isEmpty()) {
+                        sendBusy()
+                        return
+                    }
                     sendRinging()
                     withVideo = info.remVideoCount > 0
                     sipService.voip.withVideo = withVideo
