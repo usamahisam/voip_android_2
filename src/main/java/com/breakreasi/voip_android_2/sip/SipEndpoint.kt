@@ -5,14 +5,23 @@ import org.pjsip.pjsua2.OnIpChangeProgressParam
 import org.pjsip.pjsua2.OnTransportStateParam
 import org.pjsip.pjsua2.pj_constants_
 
-class SipEndpoint: Endpoint() {
+class SipEndpoint(
+    private val sipService: SipService
+): Endpoint() {
     override fun onTransportState(prm: OnTransportStateParam?) {
         super.onTransportState(prm)
     }
 
     override fun onIpChangeProgress(prm: OnIpChangeProgressParam?) {
         super.onIpChangeProgress(prm)
-        if (prm?.status != pj_constants_.PJ_SUCCESS) {
+        if (prm?.status == pj_constants_.PJ_SUCCESS) {
+            if (sipService.sipAccount != null) {
+                if (sipService.sipAccount!!.call != null) {
+                    sipService.sipAccount!!.call?.sendReinviteIfNeeded()
+                }
+            }
+            return
+        } else {
             hangupAllCalls()
             return
         }

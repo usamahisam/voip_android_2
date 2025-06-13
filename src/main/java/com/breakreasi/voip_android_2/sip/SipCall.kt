@@ -156,6 +156,26 @@ class SipCall(
         }
     }
 
+    override fun onCallRxReinvite(prm: OnCallRxReinviteParam?) {
+        try {
+            val callOpParam = CallOpParam().apply {
+                statusCode = pjsip_status_code.PJSIP_SC_OK
+                opt.audioCount = if (withAudio) 1 else 0
+                opt.videoCount = if (withVideo) 1 else 0
+                opt.flag = pjsua_call_flag.PJSUA_CALL_INCLUDE_DISABLED_MEDIA.toLong()
+            }
+            answer(callOpParam)
+        } catch (_: Exception) {
+            try {
+                val rejectParam = CallOpParam().apply {
+                    statusCode = pjsip_status_code.PJSIP_SC_NOT_ACCEPTABLE_HERE
+                }
+                answer(rejectParam)
+            } catch (_: Exception) {
+            }
+        }
+    }
+
     fun startTimeoutCall() {
         cancelCallTimeout()
         callTimeoutRunnable = Runnable {
@@ -229,6 +249,18 @@ class SipCall(
         }
         try {
             disconnected()
+        } catch (_: Exception) {
+        }
+    }
+
+    fun sendReinviteIfNeeded() {
+        try {
+            val callOpParam = CallOpParam().apply {
+                opt.audioCount = if (withAudio) 1 else 0
+                opt.videoCount = if (withVideo) 1 else 0
+                opt.flag = 0
+            }
+            reinvite(callOpParam)
         } catch (_: Exception) {
         }
     }

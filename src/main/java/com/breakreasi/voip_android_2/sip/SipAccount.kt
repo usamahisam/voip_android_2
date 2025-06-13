@@ -121,28 +121,40 @@ class SipAccount(
 
             accCfg = AccountConfig().apply {
                 idUri = "\"$displayName\" <sip:$username@${host}:${port}>"
-                sipConfig.authCreds = credArray
-                sipConfig.proxies.clear()
-                regConfig.registrarUri = "sip:${host}:${port}"
-                regConfig.registerOnAdd = true
-                regConfig.dropCallsOnFail = true
-                videoConfig.defaultCaptureDevice = 1
-                videoConfig.defaultRenderDevice = 0
-                videoConfig.autoTransmitOutgoing = true
-                videoConfig.autoShowIncoming = true
-                natConfig.iceEnabled = false
-                natConfig.turnEnabled = false
-                natConfig.sdpNatRewriteUse = pj_constants_.PJ_FALSE
-                natConfig.viaRewriteUse = pj_constants_.PJ_FALSE
-                natConfig.sipStunUse = pj_constants_.PJ_FALSE
-                natConfig.mediaStunUse = pj_constants_.PJ_FALSE
-                mediaConfig.srtpUse = pjmedia_srtp_use.PJMEDIA_SRTP_OPTIONAL
-                mediaConfig.srtpSecureSignaling = 0
-                mediaConfig.rtcpMuxEnabled = true
-                mediaConfig.streamKaEnabled = true
-                callConfig.timerSessExpiresSec = 300
-                callConfig.timerMinSESec = 90
-                callConfig.timerUse = pj_constants_.PJ_TRUE
+                sipConfig.apply {
+                    authCreds = credArray
+                    proxies.clear()
+                }
+                regConfig.apply {
+                    registrarUri = "sip:${host}:${port}"
+                    registerOnAdd = true
+                    dropCallsOnFail = true
+                }
+                natConfig.apply {
+                    iceEnabled = false
+                    turnEnabled = false
+                    sdpNatRewriteUse = pj_constants_.PJ_TRUE
+                    viaRewriteUse = pj_constants_.PJ_TRUE
+                    sipStunUse = pj_constants_.PJ_FALSE
+                    mediaStunUse = pj_constants_.PJ_FALSE
+                }
+                callConfig.apply {
+                    timerSessExpiresSec = 300
+                    timerMinSESec = 90
+                    timerUse = pj_constants_.PJ_TRUE
+                }
+                mediaConfig.apply {
+                    srtpUse = pjmedia_srtp_use.PJMEDIA_SRTP_OPTIONAL
+                    srtpSecureSignaling = 0
+                    rtcpMuxEnabled = true
+                    streamKaEnabled = true
+                }
+                videoConfig.apply {
+                    defaultCaptureDevice = 1
+                    defaultRenderDevice = 0
+                    autoTransmitOutgoing = true
+                    autoShowIncoming = true
+                }
             }
 
             create(accCfg)

@@ -6,6 +6,7 @@ import android.media.AudioManager
 import android.os.Build
 import org.pjsip.PjCameraInfo2
 import org.pjsip.pjsua2.EpConfig
+import org.pjsip.pjsua2.StringVector
 import org.pjsip.pjsua2.TransportConfig
 import org.pjsip.pjsua2.pj_qos_type
 import org.pjsip.pjsua2.pjsip_transport_type_e
@@ -24,9 +25,31 @@ class SipEngine(
         am = sipService.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         try {
             PjCameraInfo2.SetCameraManager(cm)
-            endpoint = SipEndpoint().apply {
+            endpoint = SipEndpoint(sipService).apply {
                 libCreate()
             }
+
+            val stunServers = StringVector().apply {
+                // Google STUN Servers
+                add("stun:stun.l.google.com:19302")
+                add("stun:stun1.l.google.com:19302")
+                add("stun:stun2.l.google.com:19302")
+                add("stun:stun3.l.google.com:19302")
+                add("stun:stun4.l.google.com:19302")
+
+                // Twilio STUN Servers
+                add("stun:global.stun.twilio.com:3478")
+
+                // 3CX STUN Servers
+                add("stun:stun.3cx.com:3478")
+
+                // Other reliable public STUN
+                add("stun:stun.stunprotocol.org:3478")
+                add("stun:stun.sipnet.net:3478")
+                add("stun:stun.ideasip.com:3478")
+                add("stun:stun.ekiga.net:3478")
+            }
+
             epConfig = EpConfig().apply {
                 uaConfig.userAgent = String.format(
                     "VOIP SIP Client/%s (%s %s; Android %s)",
@@ -35,6 +58,7 @@ class SipEngine(
                     Build.MODEL,
                     Build.VERSION.RELEASE
                 )
+                uaConfig.stunServer = stunServers
                 medConfig.hasIoqueue = true
                 medConfig.clockRate = 16000
                 medConfig.quality = 10
