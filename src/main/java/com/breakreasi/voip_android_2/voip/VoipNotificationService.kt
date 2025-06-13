@@ -5,10 +5,7 @@ import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Binder
 import android.os.Build
-import android.os.Handler
 import android.os.IBinder
-import android.os.Looper
-import com.breakreasi.voip_android_2.history.HistoryPreferences
 
 class VoipNotificationService: Service() {
     private val binder: VoipNotificationService.LocalBinder = LocalBinder()

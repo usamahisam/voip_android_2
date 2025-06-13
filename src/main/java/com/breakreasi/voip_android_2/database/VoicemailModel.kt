@@ -1,6 +1,6 @@
-package com.breakreasi.voip_android_2.sip
+package com.breakreasi.voip_android_2.database
 
-class SipVoicemailModel {
+class VoicemailModel {
     var name: String? = null
     var from: String? = null
     var url: String? = null

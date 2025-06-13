@@ -7,6 +7,8 @@ import android.os.CountDownTimer
 import android.os.Handler
 import android.os.Looper
 import androidx.core.content.ContextCompat
+import com.breakreasi.voip_android_2.database.VoicemailModel
+import com.breakreasi.voip_android_2.database.VoicemailPreferences
 import java.io.File
 
 
@@ -90,7 +92,7 @@ class SipVoicemail(
         cancelTimer()
         countDownTimer = object : CountDownTimer(callTimeoutMillis, 1000) {
             override fun onTick(millisUntilFinished: Long) {
-                val secondsLeft = millisUntilFinished / 1000
+                val secondsLeft = (millisUntilFinished / 1000) + 1
                 sipService.voip.notifyVoicemailTimer(secondsLeft)
             }
             override fun onFinish() {
@@ -105,7 +107,7 @@ class SipVoicemail(
         countDownTimer = null
     }
 
-    fun getList(): MutableList<SipVoicemailModel>? {
-        return SipVoicemailPreferences.getList(sipService)
+    fun getList(): MutableList<VoicemailModel>? {
+        return VoicemailPreferences.getList(sipService)
     }
 }

@@ -1,4 +1,4 @@
-package com.breakreasi.voip_android_2.history
+package com.breakreasi.voip_android_2.database
 
 class HistoryModel {
     var name: String? = null

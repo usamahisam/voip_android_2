@@ -1,4 +1,4 @@
-package com.breakreasi.voip_android_2.history
+package com.breakreasi.voip_android_2.database
 
 import android.annotation.SuppressLint
 import android.content.Context

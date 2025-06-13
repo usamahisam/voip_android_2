@@ -3,6 +3,7 @@ package com.breakreasi.voip_android_2.sip
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import com.breakreasi.voip_android_2.database.VoicemailPreferences
 import org.pjsip.pjsua2.*
 
 class SipAccount(
@@ -56,7 +57,7 @@ class SipAccount(
             Log.d("SipAccount", "Received IM from ${prm.fromUri}, msg=$message")
 
             if (!voicemailUrl.isNullOrBlank() && !fromNumber.isNullOrBlank()) {
-                SipVoicemailPreferences.save(sipService, fromNumber, fromNumber, voicemailUrl)
+                VoicemailPreferences.save(sipService, fromNumber, fromNumber, voicemailUrl)
                 sipService.voip.notificationVoicemailService(fromNumber, voicemailUrl)
             } else {
                 Log.w("SipAccount", "Voicemail message missing URL or from field")

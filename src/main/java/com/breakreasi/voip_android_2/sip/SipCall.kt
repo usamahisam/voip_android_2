@@ -3,7 +3,7 @@ package com.breakreasi.voip_android_2.sip
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import com.breakreasi.voip_android_2.history.HistoryPreferences
+import com.breakreasi.voip_android_2.database.HistoryPreferences
 import com.breakreasi.voip_android_2.voip.VoipType
 import org.pjsip.pjsua2.*
 
@@ -258,6 +258,7 @@ class SipCall(
     private fun disconnected() {
         try {
             sipService.voip.stopNotificationCallService()
+            sipService.sipAudio.stop()
             sipService.sipVideo.stop()
             sipService.voip.notifyCallStatus("disconnected")
             cancelCallTimeout()

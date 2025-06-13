@@ -1,4 +1,4 @@
-package com.breakreasi.voip_android_2.sip
+package com.breakreasi.voip_android_2.database
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -9,7 +9,7 @@ import com.google.gson.reflect.TypeToken
 import java.text.SimpleDateFormat
 
 
-class SipVoicemailPreferences {
+class VoicemailPreferences {
     companion object {
         private val PREFS_NAME: String = "sipvoip_voicemail_prefs"
         private val LIST_KEY: String = "sipvoip_voicemail_list"
@@ -18,23 +18,23 @@ class SipVoicemailPreferences {
             return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         }
 
-        fun getList(context: Context?): MutableList<SipVoicemailModel>? {
+        fun getList(context: Context?): MutableList<VoicemailModel>? {
             val prefs = getSharedPreferences(context!!)
             val json = prefs.getString(LIST_KEY, null)
             if (json == null || json.isEmpty()) {
-                return ArrayList<SipVoicemailModel>()
+                return ArrayList<VoicemailModel>()
             }
             val gson = Gson()
-            return gson.fromJson<MutableList<SipVoicemailModel>?>(
+            return gson.fromJson<MutableList<VoicemailModel>?>(
                 json,
-                object : TypeToken<MutableList<SipVoicemailModel>?>() {}.getType()
+                object : TypeToken<MutableList<VoicemailModel>?>() {}.getType()
             )
         }
 
         @SuppressLint("SimpleDateFormat")
         fun save(context: Context, name: String, from: String, url: String) {
             val list = getList(context)
-            val voicemailModel = SipVoicemailModel()
+            val voicemailModel = VoicemailModel()
             voicemailModel.name = name
             voicemailModel.from = from
             voicemailModel.url = url

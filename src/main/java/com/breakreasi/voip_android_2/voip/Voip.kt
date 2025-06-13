@@ -8,8 +8,8 @@ import android.os.Build
 import android.view.SurfaceView
 import androidx.core.net.toUri
 import com.breakreasi.voip_android_2.R
-import com.breakreasi.voip_android_2.history.HistoryPreferences
-import com.breakreasi.voip_android_2.sip.SipVoicemailModel
+import com.breakreasi.voip_android_2.database.HistoryPreferences
+import com.breakreasi.voip_android_2.database.VoicemailModel
 import com.breakreasi.voip_android_2.tone.Tone
 
 class Voip(
@@ -216,7 +216,7 @@ class Voip(
         }
     }
 
-    fun getVoicemailList(): MutableList<SipVoicemailModel>? {
+    fun getVoicemailList(): MutableList<VoicemailModel>? {
         return voipServiceConnection.sipService?.sipVoicemail!!.getList()
     }
 
