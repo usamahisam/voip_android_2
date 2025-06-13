@@ -17,6 +17,8 @@ class SipCall(
     var callTimeoutRunnable: Runnable? = null
     var currentState: Int? = null
     var isCall: Boolean = false
+    var audioMedia: Media? = null
+    var withAudio: Boolean = false
     var withVideo: Boolean = false
 
     init {
@@ -87,6 +89,8 @@ class SipCall(
                 return
             }
 
+            audioMedia = null
+            withAudio = false
             withVideo = false
             for (i in 0 until callInfo.media.size) {
                 val media = getMedia(i.toLong())
@@ -94,13 +98,25 @@ class SipCall(
                 if (mediaInfo.type == pjmedia_type.PJMEDIA_TYPE_AUDIO &&
                     media != null &&
                     mediaInfo.status == pjsua_call_media_status.PJSUA_CALL_MEDIA_ACTIVE) {
-                    sipService.sipAudio.start(media)
+                    val media = try {
+                        getMedia(i.toLong())
+                    } catch (_: Exception) {
+                        null
+                    }
+                    if (media != null) {
+                        audioMedia = media
+                        withAudio = true
+                    }
                 } else if (mediaInfo.type == pjmedia_type.PJMEDIA_TYPE_VIDEO &&
                     mediaInfo.status == pjsua_call_media_status.PJSUA_CALL_MEDIA_ACTIVE &&
                     mediaInfo.videoIncomingWindowId != pjsua2.INVALID_ID) {
                     sipService.sipVideo.start(mediaInfo)
                     withVideo = true
                 }
+            }
+
+            if (withAudio) {
+                sipService.sipAudio.start(audioMedia!!, withVideo)
             }
         } catch (e: Exception) {
             Log.e("SipCall", "onCallMediaState failed", e)
