@@ -5,71 +5,71 @@
 5    <uses-sdk android:minSdkVersion="23" />
 6
 7    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
-7-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:4:5-80
-7-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:4:22-77
+7-->/Volumes/FLUTTER/Projects/android/voip_android_2/src/main/AndroidManifest.xml:4:5-80
+7-->/Volumes/FLUTTER/Projects/android/voip_android_2/src/main/AndroidManifest.xml:4:22-77
 8    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-8-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:5:5-77
-8-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:5:22-74
+8-->/Volumes/FLUTTER/Projects/android/voip_android_2/src/main/AndroidManifest.xml:5:5-77
+8-->/Volumes/FLUTTER/Projects/android/voip_android_2/src/main/AndroidManifest.xml:5:22-74
 9    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_PHONE_CALL" />
-9-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:6:5-88
-9-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:6:22-85
+9-->/Volumes/FLUTTER/Projects/android/voip_android_2/src/main/AndroidManifest.xml:6:5-88
+9-->/Volumes/FLUTTER/Projects/android/voip_android_2/src/main/AndroidManifest.xml:6:22-85
 10    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
-10-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:7:5-81
-10-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:7:22-78
+10-->/Volumes/FLUTTER/Projects/android/voip_android_2/src/main/AndroidManifest.xml:7:5-81
+10-->/Volumes/FLUTTER/Projects/android/voip_android_2/src/main/AndroidManifest.xml:7:22-78
 11    <uses-permission android:name="android.permission.RECORD_AUDIO" />
-11-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:8:5-71
-11-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:8:22-68
+11-->/Volumes/FLUTTER/Projects/android/voip_android_2/src/main/AndroidManifest.xml:8:5-71
+11-->/Volumes/FLUTTER/Projects/android/voip_android_2/src/main/AndroidManifest.xml:8:22-68
 12    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-12-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:9:5-80
-12-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:9:22-78
+12-->/Volumes/FLUTTER/Projects/android/voip_android_2/src/main/AndroidManifest.xml:9:5-80
+12-->/Volumes/FLUTTER/Projects/android/voip_android_2/src/main/AndroidManifest.xml:9:22-78
 13
 14    <application>
-14-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:11:5-34:19
+14-->/Volumes/FLUTTER/Projects/android/voip_android_2/src/main/AndroidManifest.xml:11:5-34:19
 15        <activity
-15-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:12:9-20:43
+15-->/Volumes/FLUTTER/Projects/android/voip_android_2/src/main/AndroidManifest.xml:12:9-20:43
 16            android:name="com.breakreasi.voip_android_2.voip.VoipIncomingCallActivity"
-16-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:13:13-58
+16-->/Volumes/FLUTTER/Projects/android/voip_android_2/src/main/AndroidManifest.xml:13:13-58
 17            android:excludeFromRecents="true"
-17-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:14:13-46
+17-->/Volumes/FLUTTER/Projects/android/voip_android_2/src/main/AndroidManifest.xml:14:13-46
 18            android:exported="true"
-18-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:15:13-36
+18-->/Volumes/FLUTTER/Projects/android/voip_android_2/src/main/AndroidManifest.xml:15:13-36
 19            android:launchMode="singleTop"
-19-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:16:13-43
+19-->/Volumes/FLUTTER/Projects/android/voip_android_2/src/main/AndroidManifest.xml:16:13-43
 20            android:screenOrientation="portrait"
-20-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:17:13-49
+20-->/Volumes/FLUTTER/Projects/android/voip_android_2/src/main/AndroidManifest.xml:17:13-49
 21            android:showOnLockScreen="true"
-21-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:18:13-44
+21-->/Volumes/FLUTTER/Projects/android/voip_android_2/src/main/AndroidManifest.xml:18:13-44
 22            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
-22-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:19:13-69
+22-->/Volumes/FLUTTER/Projects/android/voip_android_2/src/main/AndroidManifest.xml:19:13-69
 23            android:turnScreenOn="true" />
-23-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:20:13-40
+23-->/Volumes/FLUTTER/Projects/android/voip_android_2/src/main/AndroidManifest.xml:20:13-40
 24
 25        <service
-25-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:21:9-25:57
+25-->/Volumes/FLUTTER/Projects/android/voip_android_2/src/main/AndroidManifest.xml:21:9-25:57
 26            android:name="com.breakreasi.voip_android_2.voip.VoipNotificationService"
-26-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:22:13-86
+26-->/Volumes/FLUTTER/Projects/android/voip_android_2/src/main/AndroidManifest.xml:22:13-86
 27            android:enabled="true"
-27-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:23:13-35
+27-->/Volumes/FLUTTER/Projects/android/voip_android_2/src/main/AndroidManifest.xml:23:13-35
 28            android:exported="false"
-28-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:24:13-37
+28-->/Volumes/FLUTTER/Projects/android/voip_android_2/src/main/AndroidManifest.xml:24:13-37
 29            android:foregroundServiceType="phoneCall" />
-29-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:25:13-54
+29-->/Volumes/FLUTTER/Projects/android/voip_android_2/src/main/AndroidManifest.xml:25:13-54
 30        <service
-30-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:26:9-29:40
+30-->/Volumes/FLUTTER/Projects/android/voip_android_2/src/main/AndroidManifest.xml:26:9-29:40
 31            android:name="com.breakreasi.voip_android_2.sip.SipService"
-31-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:27:13-72
+31-->/Volumes/FLUTTER/Projects/android/voip_android_2/src/main/AndroidManifest.xml:27:13-72
 32            android:enabled="true"
-32-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:28:13-35
+32-->/Volumes/FLUTTER/Projects/android/voip_android_2/src/main/AndroidManifest.xml:28:13-35
 33            android:exported="false" />
-33-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:29:13-37
+33-->/Volumes/FLUTTER/Projects/android/voip_android_2/src/main/AndroidManifest.xml:29:13-37
 34        <service
-34-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:30:9-33:40
+34-->/Volumes/FLUTTER/Projects/android/voip_android_2/src/main/AndroidManifest.xml:30:9-33:40
 35            android:name="com.breakreasi.voip_android_2.agora.AgoraService"
-35-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:31:13-76
+35-->/Volumes/FLUTTER/Projects/android/voip_android_2/src/main/AndroidManifest.xml:31:13-76
 36            android:enabled="true"
-36-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:32:13-35
+36-->/Volumes/FLUTTER/Projects/android/voip_android_2/src/main/AndroidManifest.xml:32:13-35
 37            android:exported="false" />
-37-->/home/usama/Dokumen/Projects/Android/voip_android_2/src/main/AndroidManifest.xml:33:13-37
+37-->/Volumes/FLUTTER/Projects/android/voip_android_2/src/main/AndroidManifest.xml:33:13-37
 38    </application>
 39
 40</manifest>

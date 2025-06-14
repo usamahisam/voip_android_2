@@ -64,6 +64,7 @@ class SipCall(
                     isCall = true
                     HistoryPreferences.save(sipService, sipService.voip.displayName, "Call Done")
                     sipService.voip.notifyCallStatus("connected")
+                    cancelCallTimeout()
                 }
                 pjsip_inv_state.PJSIP_INV_STATE_DISCONNECTED -> {
                     isCall = false
@@ -185,6 +186,7 @@ class SipCall(
     }
 
     fun cancelCallTimeout() {
+        if (callTimeoutRunnable == null) return
         callTimeoutRunnable?.let {
             handler.removeCallbacks(it)
             callTimeoutRunnable = null
@@ -253,7 +255,7 @@ class SipCall(
         }
     }
 
-    fun sendReinviteIfNeeded() {
+    fun sendReinvite() {
         try {
             val callOpParam = CallOpParam().apply {
                 opt.audioCount = if (withAudio) 1 else 0
