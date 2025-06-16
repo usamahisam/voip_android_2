@@ -80,7 +80,11 @@ class SipService : Service() {
             voip.notifyCallStatus("disconnected")
             return
         }
-        sipAccount!!.call?.decline()
+        if (sipAccount!!.call!!.isCall) {
+            sipAccount!!.call?.end()
+        } else {
+            sipAccount!!.call?.decline()
+        }
     }
 
     fun mic() {

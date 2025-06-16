@@ -159,7 +159,6 @@ class SipAccount(
                     autoShowIncoming = true
                 }
             }
-
             create(accCfg)
             true
         } catch (e: Exception) {

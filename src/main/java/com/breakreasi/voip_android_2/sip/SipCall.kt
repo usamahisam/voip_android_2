@@ -294,6 +294,15 @@ class SipCall(
         }
     }
 
+    fun end() {
+        val callOpParam = CallOpParam(true)
+        try {
+            hangup(callOpParam)
+        } catch (e: Exception) {
+            Log.e("SipCall", "decline failed", e)
+        }
+    }
+
     private fun sendKeyFrame() {
         try {
             vidSetStream(
