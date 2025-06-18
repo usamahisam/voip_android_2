@@ -72,9 +72,9 @@ class SipCall(
                     if (callInfo.lastStatusCode == pjsip_status_code.PJSIP_SC_REQUEST_TIMEOUT) {
                         sipService.voip.handlerNotificationDecline(isMissed = true)
                     }
-                    if (currentState != pjsip_inv_state.PJSIP_INV_STATE_CALLING) {
+//                    if (currentState != pjsip_inv_state.PJSIP_INV_STATE_CALLING) {
                         disconnected()
-                    }
+//                    }
                 }
                 pjsip_inv_state.PJSIP_INV_STATE_NULL -> {}
             }
