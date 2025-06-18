@@ -3,6 +3,7 @@ package com.breakreasi.voip_android_2.sip
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.widget.Toast
 import com.breakreasi.voip_android_2.database.HistoryPreferences
 import com.breakreasi.voip_android_2.voip.VoipType
 import org.pjsip.pjsua2.*
@@ -194,7 +195,7 @@ class SipCall(
     }
 
     fun makeCall(user: String, withVideo: Boolean) {
-        val sipUri = "sip:$user@${account.host}:${account.port}"
+        val sipUri = "sip:${user}@${account.host}:${account.port}"
         val callOpParam = CallOpParam().apply {
             opt.audioCount = 1
             opt.videoCount = if (withVideo) 1 else 0
@@ -317,10 +318,25 @@ class SipCall(
     private fun disconnected() {
         try {
             sipService.voip.stopNotificationCallService()
+        } catch (_: Exception) {
+        }
+        try {
             sipService.sipAudio.stop()
+        } catch (_: Exception) {
+        }
+        try {
             sipService.sipVideo.stop()
+        } catch (_: Exception) {
+        }
+        try {
             sipService.voip.notifyCallStatus("disconnected")
+        } catch (_: Exception) {
+        }
+        try {
             cancelCallTimeout()
+        } catch (_: Exception) {
+        }
+        try {
             destroyCall()
         } catch (_: Exception) {
         }

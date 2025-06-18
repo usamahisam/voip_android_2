@@ -19,6 +19,13 @@ interface SipRestRepo {
         @Field("reg") reg: String
     ): Call<SipRestResponse?>?
 
+    @POST("api/get_user.php")
+    @FormUrlEncoded
+    fun getUser(
+        @Field("token") token: String,
+        @Field("username") username: String,
+    ): Call<SipRestResponse?>?
+
     @Multipart
     @POST("api/send_voicemail.php")
     fun sendVoicemail(

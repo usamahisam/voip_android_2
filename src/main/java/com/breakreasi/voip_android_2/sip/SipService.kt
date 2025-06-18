@@ -56,7 +56,16 @@ class SipService : Service() {
     }
 
     fun call(user: String, withVideo: Boolean) {
-        sipAccount!!.newCall().makeCall(user, withVideo)
+        sipRest.getUser(user, object : SipRestResponseCallback<SipRestResponse> {
+            override fun onResponse(response: SipRestResponse?) {
+                if (response != null && response.status == "success") {
+                    sipAccount!!.destination = response.msg!!
+                    sipAccount!!.newCall().makeCall(sipAccount!!.destination, withVideo)
+                } else {
+                    voip.notifyCallStatus("disconnected")
+                }
+            }
+        })
     }
 
     fun callIsOn(): Boolean {

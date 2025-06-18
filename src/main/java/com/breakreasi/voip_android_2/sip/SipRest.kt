@@ -76,6 +76,27 @@ class SipRest(
         })
     }
 
+    fun getUser(username: String, callback: SipRestResponseCallback<SipRestResponse>) {
+        repo?.getUser(token, username)?.enqueue(object : Callback<SipRestResponse?> {
+            override fun onResponse(
+                call: Call<SipRestResponse?>,
+                response: Response<SipRestResponse?>
+            ) {
+                if (response.body() != null && response.body()!!.status == "success") {
+                    callback.onResponse(response.body())
+                } else {
+                    callback.onResponse(null)
+                }
+            }
+            override fun onFailure(
+                call: Call<SipRestResponse?>,
+                t: Throwable
+            ) {
+                callback.onResponse(null)
+            }
+        })
+    }
+
     fun sendVoicemail(file: File, destination: String, from: String, callback: SipRestResponseCallback<SipRestResponse>) {
         if (!file.exists()) {
             callback.onResponse(null)

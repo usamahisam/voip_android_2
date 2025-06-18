@@ -88,7 +88,7 @@ class SipAccount(
         if (checkIsCreated()) {
             sipService.voip.notifyAccountStatus("success")
             if (isIncoming) {
-                newCall().makeCall(this.destination, withVideo)
+                sipService.call(this.destination, withVideo)
             }
             return
         }
@@ -96,7 +96,7 @@ class SipAccount(
         sipService.sipRest.register(username, password, object : SipRestResponseCallback<SipRestResponse> {
             override fun onResponse(response: SipRestResponse?) {
                 if (response != null && response.status == "success") {
-                    val created = createAccount(displayName, username, password, destination, withVideo)
+                    val created = createAccount(displayName, response.msg!!, password, destination, withVideo)
                     if (!created) {
                         sipService.voip.notifyAccountStatus("failed")
                     }
@@ -125,19 +125,20 @@ class SipAccount(
                     authCreds = credArray
                     proxies.apply {
                         clear()
-                        add("sip:$username@${host}:${port}")
+                        add("sip:$username@${host}:${port};lr;nat=yes")
                     }
                 }
                 regConfig.apply {
                     registrarUri = "sip:${host}:${port}"
                     registerOnAdd = true
                     dropCallsOnFail = true
+                    contactUriParams = ";nat=yes"
                 }
                 natConfig.apply {
                     iceEnabled = false
                     turnEnabled = false
-                    sdpNatRewriteUse = pj_constants_.PJ_FALSE
-                    viaRewriteUse = pj_constants_.PJ_FALSE
+                    sdpNatRewriteUse = pj_constants_.PJ_TRUE
+                    viaRewriteUse = pj_constants_.PJ_TRUE
                     sipStunUse = pj_constants_.PJ_FALSE
                     mediaStunUse = pj_constants_.PJ_FALSE
                 }
@@ -175,7 +176,7 @@ class SipAccount(
         try {
             sipService.voip.notifyAccountStatus("success")
             if (this.isIncoming) {
-                newCall().makeCall(destination, withVideo)
+                sipService.call(destination, withVideo)
             }
         } catch (e: Exception) {
             Log.e("SipAccount", "handleAccountSuccess exception", e)
