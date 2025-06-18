@@ -39,6 +39,7 @@ class SipVideo(
         } catch (e: Exception) {
             Log.e("SipVideo", "Failed to configure codecs: ${e.message}")
         }
+        stop()
     }
 
     private fun setCodecParam(codecId: String, param: VidCodecParam) {

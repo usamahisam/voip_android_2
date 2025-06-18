@@ -5,6 +5,7 @@ import android.content.Context
 import android.media.Ringtone
 import android.media.RingtoneManager
 import android.os.Build
+import android.os.CountDownTimer
 import android.view.SurfaceView
 import androidx.core.net.toUri
 import com.breakreasi.voip_android_2.R
@@ -190,8 +191,19 @@ class Voip(
 
     fun videoSurface(localSurface: SurfaceView, remoteSurface: SurfaceView) {
         if (type == VoipType.SIP) {
-            voipServiceConnection.sipService?.videoSurfaceLocal(localSurface)
-            voipServiceConnection.sipService?.videoSurfaceRemote(remoteSurface)
+            if (voipServiceConnection.sipService != null) {
+                voipServiceConnection.sipService?.videoSurfaceLocal(localSurface)
+                voipServiceConnection.sipService?.videoSurfaceRemote(remoteSurface)
+            } else {
+                val timer = object : CountDownTimer(1000, 1000) {
+                    override fun onTick(millisUntilFinished: Long) {
+                    }
+                    override fun onFinish() {
+                        videoSurface(localSurface, remoteSurface)
+                    }
+                }
+                timer.start()
+            }
         } else if (type == VoipType.AGORA) {
             voipServiceConnection.agoraService?.videoSurfaceLocal(localSurface)
             voipServiceConnection.agoraService?.videoSurfaceRemote(remoteSurface)
