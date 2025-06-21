@@ -125,7 +125,9 @@ class VoipNotificationCall(
             builder.setVibrate(longArrayOf(0, 1000, 1000))
         } else if (am?.getRingerMode() == AudioManager.RINGER_MODE_NORMAL) {
             builder.setVibrate(longArrayOf(0, 1000, 1000))
-            VoipManager.voip!!.playRingtone();
+            if (VoipManager.voip != null) {
+                VoipManager.voip!!.playRingtone();
+            }
         }
         val notification = builder.build()
         notification.flags =

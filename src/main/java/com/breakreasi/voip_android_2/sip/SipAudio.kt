@@ -37,8 +37,8 @@ class SipAudio(
             val audDevManager = sipService.sipEngine.endpoint!!.audDevManager()
             if (audioMedia != null) {
                 try {
-                    audioMedia.adjustRxLevel(2.0f)
-                    audioMedia.adjustTxLevel(2.0f)
+                    audioMedia.adjustRxLevel(1.5f)
+                    audioMedia.adjustTxLevel(1.5f)
                 } catch (_: Exception) {}
 
                 audioMedia.startTransmit(audDevManager.playbackDevMedia)
@@ -100,10 +100,10 @@ class SipAudio(
         if (audioMedia == null || audioMedia!!.portId < 0) return
         try {
             isMute = false
-            audioMedia!!.adjustTxLevel(2.0f)
+            audioMedia!!.adjustTxLevel(1.5f)
             val capture = sipService.sipEngine.endpoint?.audDevManager()?.captureDevMedia
             if (capture != null && capture.portId >= 0) {
-                capture.adjustTxLevel(2.0f)
+                capture.adjustTxLevel(1.5f)
                 capture.startTransmit(audioMedia)
             }
         } catch (e: Exception) {
