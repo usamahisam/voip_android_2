@@ -60,10 +60,9 @@ class VoipNotificationCall(
         builder.setDefaults(Notification.DEFAULT_ALL)
         builder.setWhen(Calendar.getInstance().getTimeInMillis())
         builder.setCategory(NotificationCompat.CATEGORY_CALL)
-        builder.setPriority(NotificationCompat.PRIORITY_MAX)
+        builder.setPriority(NotificationCompat.PRIORITY_HIGH)
         builder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
 
-        builder.setFullScreenIntent(null, true)
         builder.setStyle(NotificationCompat.DecoratedCustomViewStyle())
         val fullScreenIntent = Intent(context, VoipIncomingCallActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
