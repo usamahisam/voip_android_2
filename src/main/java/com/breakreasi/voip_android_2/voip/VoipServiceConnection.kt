@@ -40,6 +40,7 @@ class VoipServiceConnection(
     }
 
     fun start() {
+        VoipManager.voip = voip
         if (sipService != null) {
             sipService?.auth(voip, voip.displayName, voip.username, voip.password, voip.destination, voip.withVideo)
         } else {
