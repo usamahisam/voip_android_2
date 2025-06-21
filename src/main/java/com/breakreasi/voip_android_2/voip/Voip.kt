@@ -30,7 +30,7 @@ class Voip(
     var withVideo: Boolean = false
     var withNotification: Boolean = false
     var callFromNotification: Boolean = false
-    private val tone: Tone = Tone()
+    val tone: Tone = Tone()
     private var ringtone: Ringtone? = null
 
     fun engineStart(displayName: String, username: String, password: String, destination: String, withVideo: Boolean, withNotification: Boolean) {
@@ -85,11 +85,6 @@ class Voip(
     }
 
     fun notifyCallStatus(status: String) {
-        if (status == "ringing") {
-            tone.start()
-        } else {
-            tone.checkAndStop()
-        }
         try {
             voipCallbacks.forEach { it.onCallStatus(this, status) }
         } catch (_: Exception) {

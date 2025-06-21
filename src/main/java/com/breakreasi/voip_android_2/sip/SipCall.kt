@@ -55,6 +55,7 @@ class SipCall(
                 }
                 pjsip_inv_state.PJSIP_INV_STATE_EARLY -> {
                     isCall = false
+//                    sipService.voip.tone.start()
                     sipService.voip.notifyCallStatus("ringing")
                 }
                 pjsip_inv_state.PJSIP_INV_STATE_CONNECTING -> {
@@ -69,12 +70,16 @@ class SipCall(
                 }
                 pjsip_inv_state.PJSIP_INV_STATE_DISCONNECTED -> {
                     isCall = false
-                    if (callInfo.lastStatusCode == pjsip_status_code.PJSIP_SC_REQUEST_TIMEOUT) {
-                        sipService.voip.handlerNotificationDecline(isMissed = true)
-                    }
+                    disconnected()
 //                    if (currentState != pjsip_inv_state.PJSIP_INV_STATE_CALLING) {
-                        disconnected()
 //                    }
+                    try {
+//                        sipService.voip.tone.checkAndStop()
+                        if (callInfo.lastStatusCode == pjsip_status_code.PJSIP_SC_REQUEST_TIMEOUT) {
+                            sipService.voip.handlerNotificationDecline(isMissed = true)
+                        }
+                    } catch (_: Exception) {
+                    }
                 }
                 pjsip_inv_state.PJSIP_INV_STATE_NULL -> {}
             }
@@ -285,6 +290,10 @@ class SipCall(
     }
 
     fun decline() {
+        if (currentState == pjsip_inv_state.PJSIP_INV_STATE_DISCONNECTED ||
+            currentState == pjsip_inv_state.PJSIP_INV_STATE_NULL) {
+            return
+        }
         val callOpParam = CallOpParam().apply {
             statusCode = pjsip_status_code.PJSIP_SC_DECLINE
         }
@@ -296,6 +305,10 @@ class SipCall(
     }
 
     fun end() {
+        if (currentState == pjsip_inv_state.PJSIP_INV_STATE_DISCONNECTED ||
+            currentState == pjsip_inv_state.PJSIP_INV_STATE_NULL) {
+            return
+        }
         val callOpParam = CallOpParam(true)
         try {
             hangup(callOpParam)
@@ -317,10 +330,6 @@ class SipCall(
 
     private fun disconnected() {
         try {
-            sipService.voip.stopNotificationCallService()
-        } catch (_: Exception) {
-        }
-        try {
             sipService.sipAudio.stop()
         } catch (_: Exception) {
         }
@@ -329,11 +338,15 @@ class SipCall(
         } catch (_: Exception) {
         }
         try {
+            cancelCallTimeout()
+        } catch (_: Exception) {
+        }
+        try {
             sipService.voip.notifyCallStatus("disconnected")
         } catch (_: Exception) {
         }
         try {
-            cancelCallTimeout()
+            sipService.voip.stopNotificationCallService()
         } catch (_: Exception) {
         }
         try {
