@@ -22,8 +22,9 @@ class VoipNotificationService: Service() {
         var displayName = intent?.getStringExtra("displayName")
         var withVideo = intent?.getBooleanExtra("withVideo", false)
         var token = intent?.getStringExtra("token")
+        var withFullscreenIntent = intent?.getBooleanExtra("with_fullscreen_intent", true)
         if (action == "notificationCallService") {
-            calling(type!!, displayName!!, withVideo!!, token!!)
+            calling(type!!, displayName!!, withVideo!!, token!!, withFullscreenIntent!!)
         } else if (action == "acceptCall") {
             if (VoipManager.voip != null) {
                 if (type.equals(VoipType.SIP.name)) {
@@ -52,9 +53,9 @@ class VoipNotificationService: Service() {
         return START_STICKY
     }
 
-    fun calling(type: String, displayName: String, withVideo: Boolean, token: String) {
+    fun calling(type: String, displayName: String, withVideo: Boolean, token: String, withFullscreenIntent: Boolean) {
         val notificationCall = VoipNotificationCall(this)
-        val notification = notificationCall.buildNotifyCall(type, displayName, withVideo, token)
+        val notification = notificationCall.buildNotifyCall(type, displayName, withVideo, token, withFullscreenIntent)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             startForeground(1092, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL)
         } else {

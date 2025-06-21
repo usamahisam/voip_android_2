@@ -77,6 +77,7 @@ class VoipServiceConnection(
         i.putExtra("displayName", displayName)
         i.putExtra("withVideo", withVideo)
         i.putExtra("token", token)
+        i.putExtra("with_fullscreen_intent", true)
         voip.context.bindService(i, this, Context.BIND_ABOVE_CLIENT)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             voip.context.startForegroundService(i)

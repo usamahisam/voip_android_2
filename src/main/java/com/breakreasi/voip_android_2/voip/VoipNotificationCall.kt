@@ -42,7 +42,8 @@ class VoipNotificationCall(
         type: String,
         displayName: String,
         withVideo: Boolean,
-        token: String
+        token: String,
+        withFullscreenIntent: Boolean
     ): Notification {
         val am = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager?
         notificationChannel(CHANNEL_ID)
@@ -63,21 +64,23 @@ class VoipNotificationCall(
         builder.setPriority(NotificationCompat.PRIORITY_HIGH)
         builder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
 
-        builder.setStyle(NotificationCompat.DecoratedCustomViewStyle())
-        val fullScreenIntent = Intent(context, VoipIncomingCallActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            putExtra("type", type)
-            putExtra("displayName", displayName)
-            putExtra("withVideo", withVideo)
-            putExtra("token", token)
+        if (withFullscreenIntent) {
+            builder.setStyle(NotificationCompat.DecoratedCustomViewStyle())
+            val fullScreenIntent = Intent(context, VoipIncomingCallActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                putExtra("type", type)
+                putExtra("displayName", displayName)
+                putExtra("withVideo", withVideo)
+                putExtra("token", token)
+            }
+            val fullScreenPendingIntent = PendingIntent.getActivity(
+                context,
+                2,
+                fullScreenIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            builder.setFullScreenIntent(fullScreenPendingIntent, true)
         }
-        val fullScreenPendingIntent = PendingIntent.getActivity(
-            context,
-            2,
-            fullScreenIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        builder.setFullScreenIntent(fullScreenPendingIntent, true)
 
         val jawabIntent = Intent(context, VoipNotificationService::class.java)
         jawabIntent.setAction("acceptCall")
