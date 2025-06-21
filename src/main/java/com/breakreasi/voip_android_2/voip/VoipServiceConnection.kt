@@ -20,6 +20,7 @@ class VoipServiceConnection(
         if (name?.shortClassName == SipService::class.java.name) {
             val binder: SipService.LocalBinder = service as SipService.LocalBinder
             sipService = binder.getService()
+            VoipManager.voip = voip
             sipService?.auth(voip, voip.displayName, voip.username, voip.password, voip.destination, voip.withVideo)
         } else if (name?.shortClassName == AgoraService::class.java.simpleName) {
             val binder: AgoraService.LocalBinder = service as AgoraService.LocalBinder
@@ -71,6 +72,7 @@ class VoipServiceConnection(
     }
 
     fun startServiceNotification(type: VoipType, displayName: String, withVideo: Boolean, token: String) {
+        VoipManager.voip = voip
         val i = Intent(voip.context, VoipNotificationService::class.java)
         i.setAction("notificationCallService")
         i.putExtra("type", type.name)

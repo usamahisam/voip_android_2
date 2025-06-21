@@ -131,6 +131,7 @@ class Voip(
 
     fun makeCall(destination: String, withVideo: Boolean) {
         if (type == VoipType.SIP) {
+            VoipManager.voip = this
             voipServiceConnection.sipService?.call(destination, withVideo)
         } else if (type == VoipType.AGORA) {
             // still disable this function
