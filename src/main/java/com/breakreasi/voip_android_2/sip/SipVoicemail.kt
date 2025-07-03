@@ -6,6 +6,7 @@ import android.media.MediaRecorder
 import android.os.CountDownTimer
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import androidx.core.content.ContextCompat
 import com.breakreasi.voip_android_2.database.VoicemailModel
 import com.breakreasi.voip_android_2.database.VoicemailPreferences
@@ -30,17 +31,18 @@ class SipVoicemail(
     fun startRecord(from: String, destination: String) {
         this.from = from
         this.destination = destination
-        this.outputFile = File(sipService.filesDir, "voicemail-${destination}.record")
+        this.outputFile = File(sipService.getExternalFilesDir(null), "Jasvicall Recordings/voicemail-${destination}.amr")
         if (outputFile!!.exists()) {
             outputFile!!.delete()
         }
+        this.outputFile = File(sipService.getExternalFilesDir(null), "Jasvicall Recordings/voicemail-${destination}.amr")
         if (!checkAudioPermission()) {
             sipService.voip.notifyVoicemailRecord("failed")
             return
         }
         recorder = MediaRecorder().apply {
             setAudioSource(MediaRecorder.AudioSource.MIC)
-            setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
+            setOutputFormat(MediaRecorder.OutputFormat.AMR_NB)
             setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
             try {
                 setAudioEncodingBitRate(4750)
@@ -49,8 +51,8 @@ class SipVoicemail(
             }
             setOutputFile(outputFile!!.absolutePath)
             prepare()
+            start()
         }
-        recorder?.start();
         startTimer()
         sipService.voip.notifyVoicemailRecord("start")
     }
@@ -58,11 +60,14 @@ class SipVoicemail(
     fun stopRecord() {
         if (recorder == null) return
         cancelTimer()
-        recorder?.apply {
-            stop()
-            release()
+        try {
+            recorder?.apply {
+                stop()
+                release()
+            }
+        } catch (e: Exception) {
+            Log.e("SipVoicemail", "stopRecord: ", e)
         }
-        recorder = null
         sipService.voip.notifyVoicemailRecord("stop")
         send()
     }

@@ -4,6 +4,7 @@ import android.content.Context
 import android.hardware.camera2.CameraManager
 import android.media.AudioManager
 import android.os.Build
+import android.util.Log
 import org.pjsip.PjCameraInfo2
 import org.pjsip.pjsua2.EpConfig
 import org.pjsip.pjsua2.StringVector
@@ -28,7 +29,9 @@ class SipEngine(
             endpoint = SipEndpoint(sipService).apply {
                 libCreate()
             }
-
+        } catch (_: Exception) {
+        }
+        try {
             val stunServers = StringVector().apply {
                 // Google STUN Servers
                 add("stun:stun.l.google.com:19302")
@@ -67,6 +70,10 @@ class SipEngine(
                 medConfig.threadCnt = 2
             }
             endpoint?.libInit(epConfig)
+        } catch (e: Exception) {
+            Log.e("hagsdhjaghd", "init", e)
+        }
+        try {
             if (udpPort != null) {
                 val udpTransport = TransportConfig().apply {
                     qosType = pj_qos_type.PJ_QOS_TYPE_VOICE
@@ -75,7 +82,8 @@ class SipEngine(
                 endpoint?.transportCreate(pjsip_transport_type_e.PJSIP_TRANSPORT_UDP, udpTransport)
             }
             endpoint?.libStart()
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.e("hagsdhjaghd", "init", e)
         }
     }
 

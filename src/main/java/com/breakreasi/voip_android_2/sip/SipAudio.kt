@@ -31,7 +31,7 @@ class SipAudio(
         }
     }
 
-    fun start(media: Media, isSpeaker: Boolean) {
+    fun start(media: Media) {
         val audioMedia = AudioMedia.typecastFromMedia(media)
         try {
             val audDevManager = sipService.sipEngine.endpoint!!.audDevManager()
@@ -46,7 +46,6 @@ class SipAudio(
             }
             this.audioMedia = audioMedia
             sipService.sipEngine.am!!.mode = AudioManager.MODE_IN_COMMUNICATION
-            setSpeaker(isSpeaker)
             mic()
         } catch (e: Exception) {
             Log.e("SipAudio", "Failed to start audio", e)
@@ -55,30 +54,32 @@ class SipAudio(
 
     fun stop() {
         try {
-            val adm = sipService.sipEngine.endpoint?.audDevManager()
-            val captureMedia = adm?.captureDevMedia
-            val playbackMedia = adm?.playbackDevMedia
-
-            if (audioMedia != null && audioMedia!!.portId >= 0) {
-                try {
-                    if (captureMedia != null && captureMedia.portId >= 0) {
-                        captureMedia.stopTransmit(audioMedia)
-                    }
-                    if (playbackMedia != null && playbackMedia.portId >= 0) {
-                        audioMedia!!.stopTransmit(playbackMedia)
-                    }
-                } catch (e: Exception) {
-                    Log.e("SipAudio", "Error while stopping transmit", e)
-                }
-            } else {
-                Log.w("SipAudio", "audioMedia is null or has invalid portId (${audioMedia?.portId})")
-            }
-
-            audioMedia = null
             sipService.sipEngine.am!!.mode = AudioManager.MODE_NORMAL
         } catch (e: Exception) {
             Log.e("SipAudio", "Failed to stop audio", e)
         }
+
+        var adm: AudDevManager? = null
+        try {
+            adm = sipService.sipEngine.endpoint!!.audDevManager()
+        } catch (e: Exception) {
+            Log.e("SipAudio", "Failed to stop audio", e)
+        }
+
+        if (adm == null) return
+        if (audioMedia == null) return
+
+//        try {
+//            val captureMedia = adm.captureDevMedia
+//            val playbackMedia = adm.playbackDevMedia
+//            captureMedia?.stopTransmit(audioMedia)
+//            if (playbackMedia != null) {
+//                audioMedia!!.stopTransmit(playbackMedia)
+//            }
+//            audioMedia = null
+//        } catch (e: Exception) {
+//            Log.e("SipAudio", "Failed to stop audio", e)
+//        }
     }
 
     fun mute() {
@@ -112,11 +113,11 @@ class SipAudio(
     }
 
     fun setSpeaker(isLoudSpeaker: Boolean) {
-        try {
-            sipService.sipEngine.endpoint!!.audDevManager().outputRoute =
-                if (isLoudSpeaker) pjmedia_aud_dev_route.PJMEDIA_AUD_DEV_ROUTE_LOUDSPEAKER
-                else pjmedia_aud_dev_route.PJMEDIA_AUD_DEV_ROUTE_DEFAULT
-        } catch (_: Exception) {}
+//        try {
+//            sipService.sipEngine.endpoint!!.audDevManager().outputRoute =
+//                if (isLoudSpeaker) pjmedia_aud_dev_route.PJMEDIA_AUD_DEV_ROUTE_LOUDSPEAKER
+//                else pjmedia_aud_dev_route.PJMEDIA_AUD_DEV_ROUTE_DEFAULT
+//        } catch (_: Exception) {}
 
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

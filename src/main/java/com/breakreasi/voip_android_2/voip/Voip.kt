@@ -172,6 +172,14 @@ class Voip(
         }
     }
 
+    fun setSpeakerphoneOn(on: Boolean) {
+        if (type == VoipType.SIP) {
+            voipServiceConnection.sipService?.setSpeakerphoneOn(on)
+        } else if (type == VoipType.AGORA) {
+            // woi
+        }
+    }
+
     fun switchCamera() {
         if (type == VoipType.SIP) {
             voipServiceConnection.sipService?.switchCamera()

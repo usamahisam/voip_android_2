@@ -137,8 +137,8 @@ class SipAccount(
                 natConfig.apply {
                     iceEnabled = false
                     turnEnabled = false
-                    sdpNatRewriteUse = pj_constants_.PJ_TRUE
-                    viaRewriteUse = pj_constants_.PJ_TRUE
+                    sdpNatRewriteUse = pj_constants_.PJ_FALSE
+                    viaRewriteUse = pj_constants_.PJ_FALSE
                     sipStunUse = pj_constants_.PJ_FALSE
                     mediaStunUse = pj_constants_.PJ_FALSE
                 }

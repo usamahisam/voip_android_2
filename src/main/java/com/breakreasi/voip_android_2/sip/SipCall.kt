@@ -95,7 +95,6 @@ class SipCall(
                 Log.e("SipCall", "Failed to get call info in onCallMediaState", e)
                 return
             }
-
             audioMedia = null
             withAudio = false
             withVideo = false
@@ -105,25 +104,15 @@ class SipCall(
                 if (mediaInfo.type == pjmedia_type.PJMEDIA_TYPE_AUDIO &&
                     media != null &&
                     mediaInfo.status == pjsua_call_media_status.PJSUA_CALL_MEDIA_ACTIVE) {
-                    val media = try {
-                        getMedia(i.toLong())
-                    } catch (_: Exception) {
-                        null
-                    }
-                    if (media != null) {
-                        audioMedia = media
-                        withAudio = true
-                    }
+                    audioMedia = media
+                    withAudio = true
+                    sipService.sipAudio.start(audioMedia!!)
                 } else if (mediaInfo.type == pjmedia_type.PJMEDIA_TYPE_VIDEO &&
                     mediaInfo.status == pjsua_call_media_status.PJSUA_CALL_MEDIA_ACTIVE &&
                     mediaInfo.videoIncomingWindowId != pjsua2.INVALID_ID) {
                     sipService.sipVideo.start(mediaInfo)
                     withVideo = true
                 }
-            }
-
-            if (withAudio) {
-                sipService.sipAudio.start(audioMedia!!, withVideo)
             }
         } catch (e: Exception) {
             Log.e("SipCall", "onCallMediaState failed", e)
@@ -330,11 +319,11 @@ class SipCall(
 
     private fun disconnected() {
         try {
-            sipService.sipAudio.stop()
+            sipService.sipVideo.stop()
         } catch (_: Exception) {
         }
         try {
-            sipService.sipVideo.stop()
+            sipService.sipAudio.stop()
         } catch (_: Exception) {
         }
         try {
