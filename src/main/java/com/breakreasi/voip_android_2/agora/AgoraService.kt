@@ -4,6 +4,7 @@ import android.app.Service
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
+import android.util.Log
 import android.view.SurfaceView
 import com.breakreasi.voip_android_2.voip.Voip
 import io.agora.rtc2.Constants
@@ -32,6 +33,7 @@ class AgoraService: Service(), AgoraIEventListener {
     }
 
     fun start(voip: Voip, displayName: String, channel: String, userToken: String, withVideo: Boolean) {
+        Log.d("AKJHSDJK", "AGORA start OK")
         this.voip = voip
         this.isCallActive = false
         agoraEngine?.start(voip, displayName, channel, userToken, withVideo)

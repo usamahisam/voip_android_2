@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Build
 import android.os.IBinder
+import android.util.Log
 import com.breakreasi.voip_android_2.agora.AgoraService
 import com.breakreasi.voip_android_2.sip.SipService
 
@@ -17,12 +18,13 @@ class VoipServiceConnection(
     var agoraService: AgoraService? = null
 
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+        Log.d("AKJHSDJK", "AGORA == " + name?.shortClassName + " // " + AgoraService::class.java.name)
         if (name?.shortClassName == SipService::class.java.name) {
             val binder: SipService.LocalBinder = service as SipService.LocalBinder
             sipService = binder.getService()
             VoipManager.voip = voip
             sipService?.auth(voip, voip.displayName, voip.username, voip.password, voip.destination, voip.withVideo)
-        } else if (name?.shortClassName == AgoraService::class.java.simpleName) {
+        } else if (name?.shortClassName == AgoraService::class.java.name) {
             val binder: AgoraService.LocalBinder = service as AgoraService.LocalBinder
             agoraService = binder.getService()
             agoraService?.start(voip, voip.displayName, voip.channel, voip.userToken, voip.withVideo)
@@ -48,8 +50,10 @@ class VoipServiceConnection(
             startService(SipService::class.java)
         }
         if (agoraService != null) {
+            Log.d("AKJHSDJK", "AGORA start 1")
             agoraService?.start(voip, voip.displayName, voip.channel, voip.userToken, voip.withVideo)
         } else {
+            Log.d("AKJHSDJK", "AGORA start 2")
             startService(AgoraService::class.java)
         }
     }

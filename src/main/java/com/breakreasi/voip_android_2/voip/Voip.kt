@@ -211,8 +211,15 @@ class Voip(
                 timer.start()
             }
         } else if (type == VoipType.AGORA) {
-            voipServiceConnection.agoraService?.videoSurfaceLocal(localSurface)
             voipServiceConnection.agoraService?.videoSurfaceRemote(remoteSurface)
+            val timer = object : CountDownTimer(1000, 1000) {
+                override fun onTick(millisUntilFinished: Long) {
+                }
+                override fun onFinish() {
+                    voipServiceConnection.agoraService?.videoSurfaceLocal(localSurface)
+                }
+            }
+            timer.start()
         }
     }
 
