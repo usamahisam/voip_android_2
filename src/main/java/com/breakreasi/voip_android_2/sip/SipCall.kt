@@ -40,6 +40,8 @@ class SipCall(
                 return
             }
 
+            Log.e("ABCDEF", ">> ${callInfo.state} | ${callInfo.lastStatusCode}")
+
             when (callInfo.state) {
                 pjsip_inv_state.PJSIP_INV_STATE_INCOMING -> {
                     isCall = false
@@ -70,16 +72,17 @@ class SipCall(
                 }
                 pjsip_inv_state.PJSIP_INV_STATE_DISCONNECTED -> {
                     isCall = false
-                    disconnected()
 //                    if (currentState != pjsip_inv_state.PJSIP_INV_STATE_CALLING) {
 //                    }
                     try {
 //                        sipService.voip.tone.checkAndStop()
-                        if (callInfo.lastStatusCode == pjsip_status_code.PJSIP_SC_REQUEST_TIMEOUT) {
+                        if (callInfo.lastStatusCode == pjsip_status_code.PJSIP_SC_REQUEST_TIMEOUT
+                            || callInfo.lastStatusCode == pjsip_status_code.PJSIP_SC_REQUEST_TERMINATED) {
                             sipService.voip.handlerNotificationDecline(isMissed = true)
                         }
                     } catch (_: Exception) {
                     }
+                    disconnected()
                 }
                 pjsip_inv_state.PJSIP_INV_STATE_NULL -> {}
             }
@@ -319,35 +322,43 @@ class SipCall(
 
     private fun disconnected() {
         try {
-            sipService.sipVideo.stop()
+            sipService.destroy()
         } catch (_: Exception) {
         }
-        try {
-            sipService.sipAudio.stop()
-        } catch (_: Exception) {
-        }
-        try {
-            cancelCallTimeout()
-        } catch (_: Exception) {
-        }
-        try {
-            sipService.voip.notifyCallStatus("disconnected")
-        } catch (_: Exception) {
-        }
-        try {
-            sipService.voip.stopNotificationCallService()
-        } catch (_: Exception) {
-        }
-        try {
-            destroyCall()
-        } catch (_: Exception) {
-        }
+//        try {
+//            sipService.sipVideo.stop()
+//        } catch (_: Exception) {
+//        }
+//        try {
+//            sipService.sipAudio.stop()
+//        } catch (_: Exception) {
+//        }
+//        try {
+//            cancelCallTimeout()
+//        } catch (_: Exception) {
+//        }
+//        try {
+//            sipService.voip.notifyCallStatus("disconnected")
+//        } catch (_: Exception) {
+//        }
+//        try {
+//            destroyCall()
+//        } catch (_: Exception) {
+//        }
+//        try {
+//            sipService.deleteAccount()
+//        } catch (_: Exception) {
+//        }
+//        try {
+//            sipService.voip.stopNotificationCallService()
+//        } catch (_: Exception) {
+//        }
     }
 
-    fun destroyCall() {
-        try {
-            sipService.deleteCall()
-        } catch (e: Exception) {
-        }
-    }
+//    fun destroyCall() {
+//        try {
+//            sipService.deleteCall()
+//        } catch (e: Exception) {
+//        }
+//    }
 }

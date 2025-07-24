@@ -49,11 +49,14 @@ class VoipNotificationService: Service() {
             val from = intent?.getStringExtra("from")
             val url = intent?.getStringExtra("url")
             voicemail(from!!, url!!)
+        } else if (action == "missedCall") {
+            val from = intent?.getStringExtra("from")
+            missedCall(from!!)
         }
         return START_STICKY
     }
 
-    fun calling(type: String, displayName: String, withVideo: Boolean, token: String, withFullscreenIntent: Boolean) {
+    private fun calling(type: String, displayName: String, withVideo: Boolean, token: String, withFullscreenIntent: Boolean) {
         val notificationCall = VoipNotificationCall(this)
         val notification = notificationCall.buildNotifyCall(type, displayName, withVideo, token, withFullscreenIntent)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -63,7 +66,7 @@ class VoipNotificationService: Service() {
         }
     }
 
-    fun voicemail(from: String, url: String) {
+    private fun voicemail(from: String, url: String) {
         val notificationCall = VoipNotificationCall(this)
         val notification = notificationCall.buildNotifyVoicemail(from, url)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -73,5 +76,14 @@ class VoipNotificationService: Service() {
         }
     }
 
+    private fun missedCall(from: String) {
+        val notificationCall = VoipNotificationCall(this)
+        val notification = notificationCall.buildNotifyCallTimeout(from)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(1282, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL)
+        } else {
+            startForeground(1282, notification)
+        }
+    }
 
 }

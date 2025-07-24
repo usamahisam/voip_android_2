@@ -123,4 +123,8 @@ class SipVideo(
         }
         toggleRemoteSurfaceFix = !toggleRemoteSurfaceFix
     }
+
+    fun destroy() {
+        stop()
+    }
 }

@@ -28,16 +28,14 @@ class SipAccount(
         if (prm?.code == pjsip_status_code.PJSIP_SC_OK) {
             handleAccountSuccess()
         } else {
-            sipService.deleteAccount()
+//            sipService.deleteCall()
+//            sipService.deleteAccount()
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onIncomingCall(prm: OnIncomingCallParam?) {
         try {
-            if (call != null) {
-                sipService.deleteCall()
-            }
             call = SipCall(sipService, this, prm?.callId)
         } catch (e: Exception) {
             Log.e("SipAccount", "Error handling incoming call", e)
@@ -85,7 +83,11 @@ class SipAccount(
         this.withVideo = withVideo
         this.isIncoming = this.destination.isNotEmpty()
 
-        if (checkIsCreated()) {
+        val isCreated = checkIsCreated()
+
+        Log.e("ABCDEF", "Register account $isCreated")
+
+        if (isCreated) {
             sipService.voip.notifyAccountStatus("success")
             if (isIncoming) {
                 sipService.call(this.destination, withVideo)
@@ -117,6 +119,7 @@ class SipAccount(
         return try {
             val credArray = AuthCredInfoVector()
             val cred = AuthCredInfo("digest", "*", username, 0, password)
+            credArray.clear()
             credArray.add(cred)
 
             accCfg = AccountConfig().apply {
@@ -137,8 +140,8 @@ class SipAccount(
                 natConfig.apply {
                     iceEnabled = false
                     turnEnabled = false
-                    sdpNatRewriteUse = pj_constants_.PJ_FALSE
-                    viaRewriteUse = pj_constants_.PJ_FALSE
+                    sdpNatRewriteUse = pj_constants_.PJ_TRUE
+                    viaRewriteUse = pj_constants_.PJ_TRUE
                     sipStunUse = pj_constants_.PJ_FALSE
                     mediaStunUse = pj_constants_.PJ_FALSE
                 }
@@ -214,6 +217,19 @@ class SipAccount(
             buddy.delete()
         } catch (e: Exception) {
             Log.e("SipAccount", "sendInstantMsg exception", e)
+        }
+    }
+
+    fun destroy() {
+        try {
+            if (call != null) {
+                call!!.delete()
+            }
+        } catch (_: Exception) {
+        }
+        try {
+            delete()
+        } catch (_: Exception) {
         }
     }
 }

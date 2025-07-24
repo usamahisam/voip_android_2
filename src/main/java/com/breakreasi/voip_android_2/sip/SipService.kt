@@ -3,13 +3,9 @@ package com.breakreasi.voip_android_2.sip
 import android.app.Service
 import android.content.Intent
 import android.os.Binder
-import android.os.Handler
 import android.os.IBinder
-import android.os.Looper
-import android.util.Log
 import android.view.SurfaceView
 import com.breakreasi.voip_android_2.voip.Voip
-import com.breakreasi.voip_android_2.voip.VoipCallback
 
 class SipService : Service() {
 
@@ -136,21 +132,9 @@ class SipService : Service() {
         sipVoicemail.send()
     }
 
-    @Synchronized
-    fun deleteCall() {
+    private fun deleteCall() {
         try {
-            sipAccount!!.call.let {
-                it?.delete()
-                sipAccount!!.call = null
-            }
-        } catch (_: Exception) {
-        }
-    }
-
-    @Synchronized
-    fun deleteAccount() {
-        try {
-            sipAccount?.let {
+            sipAccount?.call?.let {
                 it.delete()
                 sipAccount = null
             }
@@ -158,7 +142,30 @@ class SipService : Service() {
         }
     }
 
+    private fun deleteAccount() {
+        try {
+            sipAccount?.let {
+                it.destroy()
+                sipAccount = null
+            }
+        } catch (_: Exception) {
+        }
+    }
+
+    fun destroy() {
+//        stopSelf()
+        try {
+            voip.notifyCallStatus("disconnected")
+        } catch (_: Exception) {
+        }
+        sipVideo.destroy()
+//        deleteCall()
+        deleteAccount()
+    }
+
     override fun onDestroy() {
+//        Log.e("ABCDEF", "Destroy")
+//        deleteCall()
         deleteAccount()
         sipEngine.destroy()
         super.onDestroy()

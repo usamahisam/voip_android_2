@@ -43,7 +43,7 @@ class Voip(
         this.destination = destination
         this.withVideo = withVideo
         this.withNotification = withNotification
-        voipServiceConnection.start()
+        voipServiceConnection.start(type)
     }
 
     fun engineStart(displayName: String, channel: String, userToken: String, withVideo: Boolean, withNotification: Boolean) {
@@ -53,7 +53,7 @@ class Voip(
         this.userToken = userToken
         this.withVideo = withVideo
         this.withNotification = withNotification
-        voipServiceConnection.start()
+        voipServiceConnection.start(type)
     }
 
     fun registerNotificationCallback(callback: VoipNotificationCallback) {
@@ -270,11 +270,12 @@ class Voip(
         stopRingtone()
         decline()
         if (isMissed) {
+            notificationMissedCall(displayName)
             HistoryPreferences.save(context, displayName, "Missed Call")
         } else {
             HistoryPreferences.save(context, displayName, "Call Declined")
+            voipServiceConnection.stopServiceNotification()
         }
-        voipServiceConnection.stopServiceNotification()
         callFromNotification = true
         notifyNotificationStatus("notification_decline")
     }
@@ -311,7 +312,12 @@ class Voip(
         voipServiceConnection.startServiceVoicemailNotification(from, url)
     }
 
-    fun destroy() {
+    private fun notificationMissedCall(from: String) {
+        VoipManager.voip = this
+        voipServiceConnection.startServiceMissedCallNotification(from)
+    }
+
+    private fun destroy() {
         voipServiceConnection.stop()
     }
 }
