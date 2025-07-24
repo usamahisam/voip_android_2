@@ -159,8 +159,8 @@ class SipService : Service() {
         } catch (_: Exception) {
         }
         sipVideo.destroy()
-//        deleteCall()
-        deleteAccount()
+        deleteCall()
+//        deleteAccount()
     }
 
     override fun onDestroy() {
