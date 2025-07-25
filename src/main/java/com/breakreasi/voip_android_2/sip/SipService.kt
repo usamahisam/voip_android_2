@@ -45,6 +45,7 @@ class SipService : Service() {
 
     fun auth(voip: Voip, displayName: String, username: String, password: String, destination: String, withVideo: Boolean) {
         this.voip = voip
+//        deleteAccount()
         if (sipAccount == null) {
             sipAccount = SipAccount(this)
         }
@@ -133,16 +134,19 @@ class SipService : Service() {
     }
 
     private fun deleteCall() {
+        if (sipAccount == null) return
+        if (sipAccount?.call == null) return
         try {
             sipAccount?.call?.let {
                 it.delete()
-                sipAccount = null
+                sipAccount?.call = null
             }
         } catch (_: Exception) {
         }
     }
 
     private fun deleteAccount() {
+        if (sipAccount == null) return
         try {
             sipAccount?.let {
                 it.destroy()

@@ -3,8 +3,11 @@ package com.breakreasi.voip_android_2.sip
 import android.util.Log
 import com.google.gson.GsonBuilder
 import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -26,7 +29,7 @@ class SipRest(
         repo = retrofit!!.create(SipRestRepo::class.java)
     }
 
-    fun getClient(baseUrl: String): Retrofit {
+    private fun getClient(baseUrl: String): Retrofit {
         val gson = GsonBuilder()
             .setLenient()
             .create()
@@ -44,7 +47,7 @@ class SipRest(
             }
         } else {
             if (myURL != null) {
-                if (retrofit!!.baseUrl() != myURL) {
+                if (retrofit!!.baseUrl().toUri() != myURL.toURI()) {
                     retrofit = Retrofit.Builder()
                         .baseUrl(myURL)
                         .addConverterFactory(GsonConverterFactory.create(gson))
@@ -102,11 +105,13 @@ class SipRest(
             callback.onResponse(null)
             return
         }
-        val requestToken: RequestBody = RequestBody.create(MediaType.parse("text/plain"), token)
-        val requestFile: RequestBody = RequestBody.create(MediaType.parse("audio/amr"), file)
-        val voicemailPart = MultipartBody.Part.createFormData("voicemail", file.getName(), requestFile)
-        val requestDestination: RequestBody = RequestBody.create(MediaType.parse("text/plain"), destination)
-        val requestFrom: RequestBody = RequestBody.create(MediaType.parse("text/plain"), from)
+        val textPlain = "text/plain".toMediaType()
+        val audioAmr = "audio/amr".toMediaType()
+        val requestToken: RequestBody = token.toRequestBody(textPlain)
+        val requestDestination: RequestBody = destination.toRequestBody(textPlain)
+        val requestFrom: RequestBody = from.toRequestBody(textPlain)
+        val requestFile: RequestBody = file.asRequestBody(audioAmr)
+        val voicemailPart: MultipartBody.Part = MultipartBody.Part.createFormData("voicemail", file.name, requestFile)
         repo?.sendVoicemail(requestToken, voicemailPart, requestDestination, requestFrom)?.enqueue(object : Callback<SipRestResponse?> {
             override fun onResponse(
                 call: Call<SipRestResponse?>,
