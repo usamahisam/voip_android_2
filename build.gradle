@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace 'com.breakreasi.voip_android_2'
-    compileSdk 35
+    compileSdk 36
 
     defaultConfig {
         minSdk 23
@@ -42,12 +42,20 @@ android {
 }
 
 dependencies {
-    implementation(libs.material)
-    implementation(libs.full.rtc.basic)
-    implementation libs.core.ktx
-    implementation(libs.retrofit)
-    implementation(libs.retrofit2.converter.gson)
-    implementation libs.appcompat
-    implementation libs.activity
-    implementation libs.constraintlayout
+    //noinspection UseTomlInstead
+    implementation 'com.google.android.material:material:1.12.0'
+    //noinspection UseTomlInstead
+    implementation 'io.agora.rtc:full-sdk:4.5.2'
+    //noinspection UseTomlInstead
+    implementation 'androidx.core:core-ktx:1.16.0'
+    //noinspection UseTomlInstead
+    implementation 'com.squareup.retrofit2:retrofit:3.0.0'
+    //noinspection UseTomlInstead
+    implementation 'com.squareup.retrofit2:converter-gson:3.0.0'
+    //noinspection UseTomlInstead
+    implementation 'androidx.appcompat:appcompat:1.7.1'
+    //noinspection UseTomlInstead
+    implementation 'androidx.activity:activity-ktx:1.10.1'
+    //noinspection UseTomlInstead
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
 }
