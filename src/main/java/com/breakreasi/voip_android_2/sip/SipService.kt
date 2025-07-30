@@ -179,7 +179,7 @@ class SipService : Service() {
         if (sipAccount == null) return
         try {
             sipAccount?.destroy()
-//            sipAccount?.delete()
+            sipAccount?.delete()
             sipAccount = null
         } catch (_: Exception) {
         }
