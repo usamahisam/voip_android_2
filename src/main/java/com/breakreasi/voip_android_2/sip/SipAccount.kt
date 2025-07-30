@@ -223,12 +223,8 @@ class SipAccount(
     fun destroy() {
         try {
             if (call != null) {
-                call!!.delete()
+                call?.delete()
             }
-        } catch (_: Exception) {
-        }
-        try {
-            delete()
         } catch (_: Exception) {
         }
     }

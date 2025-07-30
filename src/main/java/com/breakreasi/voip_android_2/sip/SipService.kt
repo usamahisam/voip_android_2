@@ -1,17 +1,29 @@
 package com.breakreasi.voip_android_2.sip
 
 import android.app.Service
+import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import android.os.Binder
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
+import android.util.Log
 import android.view.SurfaceView
 import com.breakreasi.voip_android_2.voip.Voip
+import org.pjsip.pjsua2.IpChangeParam
 
 class SipService : Service() {
 
     private val binder: LocalBinder = LocalBinder()
     val host: String = "voip.jasvicall.my.id"
     val port: Int = 5160
+    var displayName: String = ""
+    var username: String = ""
+    var password: String = ""
     lateinit var sipEngine: SipEngine
     lateinit var sipRest: SipRest
     var sipAccount: SipAccount? = null
@@ -20,6 +32,8 @@ class SipService : Service() {
     lateinit var sipVideo: SipVideo
     lateinit var sipVoicemail: SipVoicemail
     lateinit var voip: Voip
+
+    lateinit var connectivityManager: ConnectivityManager
 
     override fun onBind(intent: Intent?): IBinder = binder
 
@@ -37,6 +51,17 @@ class SipService : Service() {
         sipVideo = SipVideo(this)
         sipEngine.configures()
         sipVoicemail = SipVoicemail(this)
+        connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val builder = NetworkRequest.Builder()
+            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+            .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+        connectivityManager.registerNetworkCallback(builder.build(), object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                Handler(Looper.getMainLooper()).post {
+                    ipChange()
+                }
+            }
+        });
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -45,11 +70,16 @@ class SipService : Service() {
 
     fun auth(voip: Voip, displayName: String, username: String, password: String, destination: String, withVideo: Boolean) {
         this.voip = voip
-//        deleteAccount()
-        if (sipAccount == null) {
-            sipAccount = SipAccount(this)
-        }
+        this.displayName = displayName
+        this.username = username
+        this.password = password
+        deleteAccount()
+        sipAccount = SipAccount(this)
         sipAccount?.auth(host, port, displayName, username, password, destination, withVideo)
+    }
+
+    fun reAuth() {
+//      deleteAccount()
     }
 
     fun call(user: String, withVideo: Boolean) {
@@ -148,11 +178,19 @@ class SipService : Service() {
     private fun deleteAccount() {
         if (sipAccount == null) return
         try {
-            sipAccount?.let {
-                it.destroy()
-                sipAccount = null
-            }
+            sipAccount?.destroy()
+//            sipAccount?.delete()
+            sipAccount = null
         } catch (_: Exception) {
+        }
+    }
+
+    private fun ipChange() {
+        if (!sipEngine.isLibStarted) return
+        try {
+            sipEngine.endpoint?.handleIpChange(IpChangeParam())
+        } catch (e: Exception) {
+            Log.d("BNASBDNVBN", "e: ${e.message}")
         }
     }
 

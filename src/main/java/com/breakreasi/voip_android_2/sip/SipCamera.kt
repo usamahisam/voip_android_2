@@ -52,7 +52,7 @@ class SipCamera(
 
     fun setOrientation() {
         val orient = if (Build.MANUFACTURER.equals("samsung", ignoreCase = true)) {
-            pjmedia_orient.PJMEDIA_ORIENT_ROTATE_90DEG
+            pjmedia_orient.PJMEDIA_ORIENT_ROTATE_180DEG
         } else {
             pjmedia_orient.PJMEDIA_ORIENT_ROTATE_270DEG
         }

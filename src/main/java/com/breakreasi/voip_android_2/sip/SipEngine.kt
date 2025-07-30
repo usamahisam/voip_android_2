@@ -19,6 +19,7 @@ class SipEngine(
     var cm: CameraManager? = null
     var am: AudioManager? = null
     var endpoint: SipEndpoint? = null
+    var isLibStarted: Boolean = false
     private var epConfig: EpConfig? = null
 
     fun init(udpPort: Int? = null) {
@@ -81,7 +82,9 @@ class SipEngine(
                 }
                 endpoint?.transportCreate(pjsip_transport_type_e.PJSIP_TRANSPORT_UDP, udpTransport)
             }
+            endpoint?.libRegisterThread("VOIP ANDROID 2")
             endpoint?.libStart()
+            isLibStarted = true
         } catch (e: Exception) {
             Log.e("hagsdhjaghd", "init", e)
         }
@@ -94,6 +97,7 @@ class SipEngine(
     }
 
     fun destroy() {
+        isLibStarted = false
         try {
             endpoint?.let {
                 it.libDestroy()

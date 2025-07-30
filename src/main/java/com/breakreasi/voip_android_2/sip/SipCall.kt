@@ -21,6 +21,7 @@ class SipCall(
     var audioMedia: Media? = null
     var withAudio: Boolean = false
     var withVideo: Boolean = false
+    var sessionCall: Boolean = false
 
     init {
         isCall = false
@@ -44,6 +45,7 @@ class SipCall(
 
             when (callInfo.state) {
                 pjsip_inv_state.PJSIP_INV_STATE_INCOMING -> {
+                    sessionCall = true
                     isCall = false
                     sendRinging()
                     withVideo = callInfo.remVideoCount > 0
@@ -192,6 +194,7 @@ class SipCall(
     }
 
     fun makeCall(user: String, withVideo: Boolean) {
+        sessionCall = true
         val sipUri = "sip:${user}@${account.host}:${account.port}"
         val callOpParam = CallOpParam().apply {
             opt.audioCount = 1
@@ -321,6 +324,8 @@ class SipCall(
     }
 
     private fun disconnected() {
+        sessionCall = false
+        cancelCallTimeout()
         try {
             sipService.destroy()
         } catch (_: Exception) {
